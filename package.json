@@ -1,0 +1,113 @@
+{
+  "name": "example-cognito",
+  "version": "0.0.1",
+  "scripts": {
+    "build": "sls package",
+    "deploy": "sls deploy --aws-profile=mridang",
+    "start": "npx nest start",
+    "test": "jest --verbose --config=jest.config.js --runInBand",
+    "test:watch": "npm run test -- --watch",
+    "test:debug": "jest --verbose --config=jest.config.js --runInBand --detectOpenHandles",
+    "format": "prettier --write \"**/*.{js,ts,jsx,tsx,json,css,md,html}\"",
+    "format:check": "prettier --check \"**/*.{js,ts,jsx,tsx,json,css,md,html}\"",
+    "lint": "npx eslint --ext .jsx,.js,.tsx,.ts .",
+    "lint:fix": "npx eslint --ext .jsx,.js,.tsx,.ts . --fix",
+    "serverless": "serverless",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run --browser chrome"
+  },
+  "dependencies": {
+    "@aws-lambda-powertools/logger": "^1.18.1",
+    "@aws-sdk/client-secrets-manager": "^3.511.0",
+    "@codegenie/serverless-express": "^4.3.0",
+    "@nestjs/axios": "^3.0.2",
+    "@nestjs/common": "^10.0.0",
+    "@nestjs/config": "^3.1.1",
+    "@nestjs/core": "^10.0.0",
+    "@nestjs/cqrs": "^10.2.6",
+    "@nestjs/platform-express": "^10.0.0",
+    "@nestjs/serve-static": "^4.0.1",
+    "@nestjs/terminus": "^10.2.3",
+    "@ntegral/nestjs-sentry": "^4.0.1",
+    "@octokit/core": "^5.1.0",
+    "@octokit/plugin-rest-endpoint-methods": "^10.2.0",
+    "@octokit/rest": "^20.0.2",
+    "@sentry/node": "^7.106.0",
+    "@slack/bolt": "^3.16.0",
+    "adm-zip": "^0.5.10",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.1",
+    "cookie-parser": "^1.4.6",
+    "express-handlebars": "^7.1.2",
+    "hbs": "^4.2.0",
+    "helmet": "^7.1.0",
+    "probot": "^13.0.0",
+    "reflect-metadata": "^0.2.1",
+    "@lifeomic/axios-fetch": "^3.0.1"
+  },
+  "engines": {
+    "node": "20.x"
+  },
+  "repository": {
+    "url": "https://github.com/mridang/finchapp"
+  },
+  "overrides": {
+    "eslint-config-standard-with-typescript": {
+      "@typescript-eslint/eslint-plugin": "^7.0.0"
+    },
+    "@ntegral/nestjs-sentry": {
+      "reflect-metadata": "^0.2.1"
+    },
+    "@probot/pino": {
+      "@sentry/node": "7.106.0"
+    },
+    "axios": "1.6.7",
+    "ip": "2.0.1"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^10.3.2",
+    "@nestjs/testing": "^10.3.3",
+    "@serverless/typescript": "^3.38.0",
+    "@tsconfig/node20": "latest",
+    "@types/adm-zip": "^0.5.5",
+    "@types/aws-lambda": "^8.10.133",
+    "@types/cookie-parser": "^1.4.7",
+    "@types/express": "^4.17.21",
+    "@types/express-handlebars": "^6.0.0",
+    "@types/hbs": "^4.0.4",
+    "@types/jest": "^29.5.11",
+    "@types/node": "^20.3.2",
+    "@types/supertest": "^6.0.2",
+    "@typescript-eslint/eslint-plugin": "^7.0.2",
+    "@typescript-eslint/parser": "^7.0.2",
+    "@typescript-eslint/typescript-estree": "^7.0.0",
+    "cypress": "^13.6.6",
+    "dotenv": "^16.4.5",
+    "eslint": "^8.0.1",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-config-standard-with-typescript": "^43.0.1",
+    "eslint-plugin-cypress": "^2.15.1",
+    "eslint-plugin-eslint-comments": "^3.2.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-jest": "^27.6.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "eslint-plugin-promise": "^6.1.1",
+    "jest": "^29.7.0",
+    "localtunnel": "^2.0.2",
+    "nock": "^13.5.4",
+    "npm": "^10.4.0",
+    "prettier": "^3.1.1",
+    "serverless": "^3.38.0",
+    "serverless-localstack": "^1.1.1",
+    "serverless-plugin-typescript": "^2.1.5",
+    "source-map-support": "^0.5.21",
+    "supertest": "^6.3.4",
+    "testcontainers": "^10.7.1",
+    "ts-jest": "^29.1.0",
+    "ts-loader": "^9.4.3",
+    "ts-node": "^10.9.1",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.1.3"
+  }
+}
