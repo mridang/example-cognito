@@ -201,6 +201,191 @@ const serverlessConfiguration: AWS = {
           }),
         },
       },
+      CognitoUserPool: {
+        Type: 'AWS::Cognito::UserPool',
+        Properties: {
+          AccountRecoverySetting: {
+            RecoveryMechanisms: [
+              {
+                Name: 'verified_email',
+                Priority: 1,
+              },
+            ],
+          },
+          AdminCreateUserConfig: {
+            InviteMessageTemplate: {
+              EmailMessage:
+                'Use the username {username} and the temporary password {####} to log in for the first time',
+              EmailSubject: 'Your Invitation to Join Our Service',
+            },
+            UnusedAccountValidityDays: 180,
+          },
+          AliasAttributes: ['email'],
+          AutoVerifiedAttributes: ['email'],
+          DeletionProtection: 'ACTIVE',
+          EmailVerificationMessage:
+            'Thank you for signing up. Please click the link below to verify your email address: {####}',
+          EmailVerificationSubject: 'Verify Your Email Address',
+          EnabledMfas: ['SOFTWARE_TOKEN_MFA'],
+          MfaConfiguration: 'OPTIONAL',
+          Policies: {
+            PasswordPolicy: {
+              MinimumLength: 8,
+              RequireLowercase: true,
+              RequireNumbers: true,
+              RequireSymbols: true,
+              RequireUppercase: true,
+            },
+          },
+          Schema: [
+            {
+              Name: 'language',
+              AttributeDataType: 'String',
+              Mutable: true,
+              Required: false,
+            },
+          ],
+          UserPoolName: 'MyUserPool',
+          VerificationMessageTemplate: {
+            EmailMessage:
+              'Welcome to AwesomeApp! Click the link below to verify your email address: {####}. If you did not sign up for AwesomeApp, you can safely ignore this email.',
+            EmailMessageByLink:
+              "Welcome to AwesomeApp! Click the link below to verify your email address: <a href='{##Verify Email##}'>Verify Email</a>. If you did not sign up for AwesomeApp, you can safely ignore this email.",
+            EmailSubject: 'Verify your email for AwesomeApp',
+            EmailSubjectByLink: 'Verify your email for AwesomeApp',
+            SmsMessage:
+              'Welcome to AwesomeApp! Your verification code is {####}.',
+          },
+        },
+      },
+      CognitoUserPoolClient: {
+        Type: 'AWS::Cognito::UserPoolClient',
+        Properties: {
+          AccessTokenValidity: 1440,
+          AllowedOAuthFlows: ['code'],
+          AllowedOAuthFlowsUserPoolClient: true,
+          AllowedOAuthScopes: ['openid', 'email', 'profile'],
+          CallbackURLs: ['https://example.com/callback'],
+          ClientName: 'MyAppClient',
+          DefaultRedirectURI: 'https://example.com/welcome',
+          EnablePropagateAdditionalUserContextData: false,
+          EnableTokenRevocation: true,
+          ExplicitAuthFlows: [
+            'ALLOW_USER_SRP_AUTH',
+            'ALLOW_REFRESH_TOKEN_AUTH',
+          ],
+          GenerateSecret: false,
+          IdTokenValidity: 24,
+          LogoutURLs: ['https://example.com/logout'],
+          PreventUserExistenceErrors: 'ENABLED',
+          ReadAttributes: ['email', 'custom:language'],
+          RefreshTokenValidity: 30,
+          SupportedIdentityProviders: ['COGNITO'],
+          TokenValidityUnits: {
+            AccessToken: 'hours',
+            IdToken: 'hours',
+            RefreshToken: 'days',
+          },
+          UserPoolId: {
+            Ref: 'CognitoUserPool',
+          },
+          WriteAttributes: ['email', 'custom:language'],
+        },
+      },
+      UserPoolUICustomization: {
+        Type: 'AWS::Cognito::UserPoolUICustomizationAttachment',
+        Properties: {
+          UserPoolId: {
+            Ref: 'CognitoUserPool',
+          },
+          ClientId: {
+            Ref: 'CognitoUserPoolClient',
+          },
+          CSS: '.banner-customizable { background: linear-gradient(#9940B8, #C27BDB) }',
+        },
+      },
+      AdminUserGroup: {
+        Type: 'AWS::Cognito::UserPoolGroup',
+        Properties: {
+          GroupName: 'AdminUsers',
+          Description: 'Group for admin users',
+          Precedence: 1,
+          UserPoolId: {
+            Ref: 'CognitoUserPool',
+          },
+        },
+      },
+      GeneralUserGroup: {
+        Type: 'AWS::Cognito::UserPoolGroup',
+        Properties: {
+          GroupName: 'GeneralUsers',
+          Description: 'Group for general users',
+          Precedence: 2,
+          UserPoolId: {
+            Ref: 'CognitoUserPool',
+          },
+        },
+      },
+      CognitoLogGroup: {
+        Type: 'AWS::Logs::LogGroup',
+        Properties: {
+          LogGroupName: '/aws/cognito/logs',
+          RetentionInDays: 365,
+          LogGroupClass: 'INFREQUENT_ACCESS',
+        },
+      },
+      CognitoLoggingConfiguration: {
+        Type: 'AWS::Cognito::LogDeliveryConfiguration',
+        Properties: {
+          UserPoolId: {
+            Ref: 'CognitoUserPool',
+          },
+          LogConfigurations: [
+            {
+              CloudWatchLogsConfiguration: {
+                LogGroupArn: {
+                  Ref: 'CognitoLogGroup',
+                },
+              },
+            },
+          ],
+        },
+      },
+      Certificate: {
+        Type: 'AWS::CertificateManager::Certificate',
+        Properties: {
+          DomainName: 'auth.agarwal.la',
+          ValidationMethod: 'DNS',
+        },
+      },
+      UserPoolDomain: {
+        Type: 'AWS::Cognito::UserPoolDomain',
+        Properties: {
+          Domain: `auth.${parentDomain}`,
+          UserPoolId: {
+            Ref: 'CognitoUserPool',
+          },
+          CustomDomainConfig: {
+            CertificateArn: {
+              Ref: 'Certificate',
+            },
+          },
+        },
+      },
+      DNSRecord: {
+        Type: 'AWS::Route53::RecordSet',
+        Properties: {
+          HostedZoneId: hostedZoneId,
+          Name: `auth.${parentDomain}`,
+          Type: 'A',
+          AliasTarget: {
+            DNSName: {
+              'Fn::GetAtt': ['UserPoolDomain', 'CloudFrontDistribution'],
+            },
+            HostedZoneId: 'Z2FDTNDATAQYW2',
+          },
+        },
+      },
     },
   },
   functions: {
