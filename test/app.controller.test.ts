@@ -14,6 +14,7 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { IsEmail, IsNotEmpty } from 'class-validator';
+import { Public } from '../src/auth/constants';
 
 class TestDTO {
   @IsNotEmpty()
@@ -26,32 +27,37 @@ class TestDTO {
 
 @Controller()
 class DynamicController {
+  @Public()
   @Get('500')
   get500() {
     throw new Error('500 error');
   }
 
+  @Public()
   @Get('error')
   getError() {
     throw new InternalServerErrorException('General error');
   }
 
-  // Cookie test methods
+  @Public()
   @Get('set-cookie')
   setCookie(@Res() res: Response) {
     res.cookie('test', 'NestJS').send('Cookie is set');
   }
 
+  @Public()
   @Get('read-cookie')
   readCookie(@Req() req: Request) {
     return req.cookies['test'] || 'No cookie found';
   }
 
+  @Public()
   @Get('cors-test')
   getCorsTest() {
     return { message: 'CORS is enabled' };
   }
 
+  @Public()
   @Post('validate')
   validateTest(@Body() testDto: TestDTO) {
     return testDto;
