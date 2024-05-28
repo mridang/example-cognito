@@ -90,6 +90,46 @@ const serverlessConfiguration: AWS = {
   },
   resources: {
     Resources: {
+      EmailIdentity: {
+        Type: 'AWS::SES::EmailIdentity',
+        Properties: {
+          EmailIdentity: `auth.${fullDomainName}`,
+        },
+      },
+      Route53RecordSetMailFromMX: {
+        Type: 'AWS::Route53::RecordSet',
+        Properties: {
+          HostedZoneId: hostedZoneId,
+          Name: `auth.${fullDomainName}`,
+          Type: 'MX',
+          TTL: '60',
+          ResourceRecords: [
+            {
+              'Fn::Sub': '10 inbound-smtp.${AWS::Region}.amazonaws.com',
+            },
+          ],
+        },
+      },
+      Route53RecordSetMailFromTXT: {
+        Type: 'AWS::Route53::RecordSet',
+        Properties: {
+          HostedZoneId: hostedZoneId,
+          Name: `auth.${fullDomainName}`,
+          Type: 'TXT',
+          TTL: '60',
+          ResourceRecords: ['"v=spf1 include:amazonses.com ~all"'],
+        },
+      },
+      Route53RecordSetSPF: {
+        Type: 'AWS::Route53::RecordSet',
+        Properties: {
+          HostedZoneId: hostedZoneId,
+          Name: `auth.${fullDomainName}`,
+          Type: 'TXT',
+          TTL: '60',
+          ResourceRecords: ['"v=spf1 include:amazonses.com ~all"'],
+        },
+      },
       SiteCertificate: {
         Type: 'AWS::CertificateManager::Certificate',
         Properties: {
@@ -285,7 +325,7 @@ const serverlessConfiguration: AWS = {
           },
         },
       },
-      EnforceMfaForMooDomainFunction: {
+      PreSignUpTriggerLambda: {
         Type: 'AWS::Lambda::Function',
         Properties: {
           Handler: 'index.handler',
@@ -356,7 +396,7 @@ const serverlessConfiguration: AWS = {
         Type: 'AWS::Lambda::Permission',
         Properties: {
           FunctionName: {
-            'Fn::GetAtt': ['EnforceMfaForMooDomainFunction', 'Arn'],
+            'Fn::GetAtt': ['PreSignUpTriggerLambda', 'Arn'],
           },
           Action: 'lambda:InvokeFunction',
           Principal: 'cognito-idp.amazonaws.com',
@@ -378,7 +418,7 @@ const serverlessConfiguration: AWS = {
             ],
           },
           AutoVerifiedAttributes: ['email'],
-          DeletionProtection: 'INACTIVE',
+          DeletionProtection: 'INACTIVE', // This should be set to active in production
           EmailVerificationMessage:
             'Thank you for signing up. Please click the link below to verify your email address: {####}',
           EmailVerificationSubject: 'Verify Your Email Address',
@@ -403,15 +443,23 @@ const serverlessConfiguration: AWS = {
             },
           ],
           UserPoolName: 'MyUserPool',
+          // EmailConfiguration: {
+          //   EmailSendingAccount: 'DEVELOPER',
+          //   From: `noreply@auth.${fullDomainName}`,
+          //   ReplyToEmailAddress: `noreply@auth.${fullDomainName}`,
+          //   SourceArn: {
+          //     'Fn::Sub': `arn:$\{AWS::Partition}:ses:$\{AWS::Region}:$\{AWS::AccountId}:identity/noreply@auth.${fullDomainName}`,
+          //   },
+          // },
           VerificationMessageTemplate: {
             DefaultEmailOption: 'CONFIRM_WITH_CODE',
           },
           LambdaConfig: {
             PreSignUp: {
-              'Fn::GetAtt': ['EnforceMfaForMooDomainFunction', 'Arn'],
+              'Fn::GetAtt': ['PreSignUpTriggerLambda', 'Arn'],
             },
             CustomMessage: {
-              'Fn::GetAtt': ['CustomMessageLambdaFunction', 'Arn'],
+              'Fn::GetAtt': ['CustomMessageLambda', 'Arn'],
             },
             PostConfirmation: {
               'Fn::GetAtt': ['PostConfirmationTriggerLambda', 'Arn'],
@@ -582,7 +630,7 @@ const serverlessConfiguration: AWS = {
           },
         },
       },
-      CustomMessageLambdaFunction: {
+      CustomMessageLambda: {
         Type: 'AWS::Lambda::Function',
         Properties: {
           Handler: 'index.handler',
@@ -629,11 +677,11 @@ const serverlessConfiguration: AWS = {
           Timeout: 10,
         },
       },
-      CustomMessageLambdaFunctionInvokePermission: {
+      CustomMessageLambdaInvokePermission: {
         Type: 'AWS::Lambda::Permission',
         Properties: {
           FunctionName: {
-            'Fn::GetAtt': ['CustomMessageLambdaFunction', 'Arn'],
+            'Fn::GetAtt': ['CustomMessageLambda', 'Arn'],
           },
           Action: 'lambda:InvokeFunction',
           Principal: 'cognito-idp.amazonaws.com',
