@@ -461,21 +461,22 @@
                     <h1>Hi,</h1>
                     <p>You've just signed up for an account. Use the button below to verify your email address. <strong>This link is only valid for the next 24 hours.</strong></p>
                     <!-- Action -->
-                    <table class="body-action" align="center" width="100%" cellpadding="0" cellspacing="0" role="presentation">
-                      <tr>
-                        <td align="center">
-                          <!-- Border based button
-       https://litmus.com/blog/a-guide-to-bulletproof-buttons-in-email-design -->
-                          <table width="100%" border="0" cellspacing="0" cellpadding="0" role="presentation">
-                            <tr>
-                              <td align="center">
-                                <a href="{{linkParameter}}" class="f-fallback button button--green" target="_blank">Verify your account</a>
+                    <table class="attributes" width="100%" cellpadding="0" cellspacing="0" role="presentation">
+                      <tbody><tr>
+                        <td class="attributes_content">
+                          <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+                            <tbody><tr>
+                              <td class="attributes_item">
+                                    <span class="f-fallback">
+              <center><strong>{{codeParameter}}</strong></center>
+            </span>
                               </td>
                             </tr>
-                          </table>
+
+                            </tbody></table>
                         </td>
                       </tr>
-                    </table>
+                      </tbody></table>
                     <p>If you did not sign up, please ignore this email or <a href="mailto:support@agarwal.la">contact support</a> if you have questions.</p>
                     <p>Thanks
                     </p>

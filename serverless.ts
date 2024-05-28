@@ -404,7 +404,7 @@ const serverlessConfiguration: AWS = {
           ],
           UserPoolName: 'MyUserPool',
           VerificationMessageTemplate: {
-            DefaultEmailOption: 'CONFIRM_WITH_LINK',
+            DefaultEmailOption: 'CONFIRM_WITH_CODE',
           },
           LambdaConfig: {
             PreSignUp: {
@@ -600,23 +600,24 @@ const serverlessConfiguration: AWS = {
 
                 switch (event.triggerSource) {
                     case 'CustomMessage_SignUp':
-                        event.response.emailSubject = "Welcome!";
-                        event.response.emailMessage = \`${jsesc(readFileSync('etc/emails/custommessage_signup.html', 'utf-8'))}\`.replace(/{{(.*?)}}/g, (match, p1) => event.request[p1]);
+                        event.response.emailSubject = "You've been invited";
+                        event.response.emailMessage = \`${jsesc(readFileSync('etc/emails/custommessage_signup.html', 'utf-8'))}\`.replace(/{{(.*?)}}/g, (match, p1) => event.request[p1]).replace(/{{(.*?)}}/g, (match, p1) => event.callerContext[p1]);
                         break;
 
                     case 'CustomMessage_AdminCreateUser':
                         event.response.emailSubject = "You've been invited";
-                        event.response.emailMessage = \`${jsesc(readFileSync('etc/emails/custommessage_admincreateuser.html', 'utf-8'))}\`.replace(/{{(.*?)}}/g, (match, p1) => event.request[p1]);
+                        event.response.emailMessage = \`${jsesc(readFileSync('etc/emails/custommessage_admincreateuser.html', 'utf-8'))}\`.replace(/{{(.*?)}}/g, (match, p1) => event.request[p1]).replace(/{{(.*?)}}/g, (match, p1) => event.callerContext[p1]);
                         break;
 
                     case 'CustomMessage_ResendCode':
                         event.response.emailSubject = "Your Verification Code resent";
-                        event.response.emailMessage = \`${jsesc(readFileSync('etc/emails/custommessage_resendcode.html', 'utf-8'))}\`.replace(/{{(.*?)}}/g, (match, p1) => event.request[p1]);
+                        event.response.emailMessage = \`${jsesc(readFileSync('etc/emails/custommessage_resendcode.html', 'utf-8'))}\`.replace(/{{(.*?)}}/g, (match, p1) => event.request[p1]).replace(/{{(.*?)}}/g, (match, p1) => event.callerContext[p1]);
                         break;
 
                     case 'CustomMessage_ForgotPassword':
                         event.response.emailSubject = "Password Reset Requests";
-                        event.response.emailMessage = \`${jsesc(readFileSync('etc/emails/custommessage_forgotpassword.html', 'utf-8'))}\`.replace(/{{(.*?)}}/g, (match, p1) => event.request[p1]);
+                        event.response.emailMessage = \`${jsesc(readFileSync('etc/emails/custommessage_forgotpassword.html', 'utf-8'))}\`.replace(/{{(.*?)}}/g, (match, p1) => event.request[p1]).replace(/{{(.*?)}}/g, (match, p1) => event.callerContext[p1]);
+                        break;
                 }
 
                 return event;
