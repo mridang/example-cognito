@@ -35,7 +35,7 @@
     "@ntegral/nestjs-sentry": "^4.0.1",
     "@octokit/core": "^5.1.0",
     "@octokit/plugin-rest-endpoint-methods": "^10.2.0",
-    "@octokit/rest": "^20.0.2",
+    "@octokit/rest": "^20.1.1",
     "@sentry/node": "^7.106.0",
     "@slack/bolt": "^3.16.0",
     "adm-zip": "^0.5.10",
