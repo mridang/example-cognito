@@ -10,10 +10,12 @@ import { SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
 import getSecret from './utils/secrets';
 import { secretName } from './constants';
 import { APP_INTERCEPTOR } from '@nestjs/core';
+import { AuthModule } from './auth/auth.module';
 
 @Global()
 @Module({
   imports: [
+    AuthModule,
     HttpModule,
     TerminusModule,
     SentryModule.forRootAsync({

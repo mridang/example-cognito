@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JWT Info</title>
+</head>
+<body>
+{{#if isLoggedIn}}
+  <p>JWT Decoded: {{jwt}}</p>
+  <a href="/logout">Logout</a>
+{{else}}
+  <p>No JWT found.</p>
+  <a href="/login">Login</a>
+{{/if}}
+</body>
+</html>

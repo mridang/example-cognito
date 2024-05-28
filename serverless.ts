@@ -2,10 +2,13 @@ import type { AWS } from '@serverless/typescript';
 import { AwsLambdaRuntime } from '@serverless/typescript';
 import packageJson from './package.json';
 import { secretName } from './src/constants';
+import { readFileSync } from 'node:fs';
+import jsesc from 'jsesc';
 
 const parentDomain = process.env.PARENT_DOMAIN;
 const hostedZoneId = process.env.HOSTED_ZONE_ID;
 const fullDomainName = `${packageJson.name}.${parentDomain}`;
+const sessionDuration = 30;
 
 const serverlessConfiguration: AWS = {
   service: packageJson.name,
@@ -40,6 +43,19 @@ const serverlessConfiguration: AWS = {
       NODE_ENV: '${self:provider.stage}',
       SERVICE_NAME: packageJson.name,
       DOMAIN_NAME: fullDomainName,
+      COGNITO_SESSION_DURATION: `${sessionDuration * 86400}`,
+      COGNITO_CLIENT_ID: {
+        'Fn::GetAtt': ['CognitoUserPoolClient', 'ClientId'],
+      },
+      COGNITO_DOMAIN: `https://auth.${fullDomainName}`,
+      COGNITO_REDIRECT_URI: `https://${fullDomainName}/callback`,
+      COGNITO_LOGOUT_REDIRECT_URI: `https://${fullDomainName}/loggedout`,
+      COGNITO_USER_POOL_ID: {
+        'Fn::GetAtt': ['CognitoUserPool', 'UserPoolId'],
+      },
+      COGNITO_REGION: {
+        Ref: 'AWS::Region',
+      },
     },
     name: 'aws',
     logRetentionInDays: 14,
@@ -193,17 +209,166 @@ const serverlessConfiguration: AWS = {
           Name: secretName,
           Description: 'Secrets for my Github application',
           SecretString: JSON.stringify({
-            APP_ID: '',
-            CLIENT_ID: '',
-            CLIENT_SECRET: '',
-            WEBHOOK_SECRET: '',
-            PRIVATE_KEY: '',
+            SENTRY_DSN: 'https://x@x.ingest.us.sentry.io/x',
           }),
+        },
+      },
+      PostConfirmationTriggerLambda: {
+        Type: 'AWS::Lambda::Function',
+        Properties: {
+          Handler: 'index.handler',
+          Role: {
+            'Fn::GetAtt': ['PostConfirmationTriggerLambdaExecutionRole', 'Arn'],
+          },
+          Architectures: ['arm64'],
+          Code: {
+            ZipFile: `
+          exports.handler = async (event) => {
+            return event;
+          };
+        `,
+          },
+          Runtime: `nodejs${packageJson.engines.node}`,
+          MemorySize: 128,
+          Timeout: 10,
+        },
+      },
+      PostConfirmationTriggerLambdaExecutionRole: {
+        Type: 'AWS::IAM::Role',
+        Properties: {
+          AssumeRolePolicyDocument: {
+            Version: '2012-10-17',
+            Statement: [
+              {
+                Effect: 'Allow',
+                Principal: { Service: 'lambda.amazonaws.com' },
+                Action: 'sts:AssumeRole',
+              },
+            ],
+          },
+          Policies: [
+            {
+              PolicyName: 'LambdaCognitoPolicy',
+              PolicyDocument: {
+                Version: '2012-10-17',
+                Statement: [
+                  {
+                    Effect: 'Allow',
+                    Action: [
+                      'logs:CreateLogGroup',
+                      'logs:CreateLogStream',
+                      'logs:PutLogEvents',
+                    ],
+                    Resource: 'arn:aws:logs:*:*:*',
+                  },
+                  {
+                    Effect: 'Allow',
+                    Action: ['cognito-idp:AdminAddUserToGroup'],
+                    Resource: '*',
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+      PostConfirmationTriggerLambdaInvokePermission: {
+        Type: 'AWS::Lambda::Permission',
+        Properties: {
+          FunctionName: {
+            'Fn::GetAtt': ['PostConfirmationTriggerLambda', 'Arn'],
+          },
+          Action: 'lambda:InvokeFunction',
+          Principal: 'cognito-idp.amazonaws.com',
+          SourceArn: {
+            'Fn::GetAtt': ['CognitoUserPool', 'Arn'],
+          },
+        },
+      },
+      EnforceMfaForMooDomainFunction: {
+        Type: 'AWS::Lambda::Function',
+        Properties: {
+          Handler: 'index.handler',
+          Role: {
+            'Fn::GetAtt': ['LambdaExecutionRole', 'Arn'],
+          },
+          Architectures: ['arm64'],
+          Code: {
+            ZipFile: `
+          exports.handler = async (event) => {
+            return event;
+          };
+        `,
+          },
+          Runtime: `nodejs${packageJson.engines.node}`,
+          MemorySize: 128,
+          Timeout: 10,
+        },
+      },
+      LambdaExecutionRole: {
+        Type: 'AWS::IAM::Role',
+        Properties: {
+          AssumeRolePolicyDocument: {
+            Version: '2012-10-17',
+            Statement: [
+              {
+                Effect: 'Allow',
+                Principal: { Service: 'lambda.amazonaws.com' },
+                Action: 'sts:AssumeRole',
+              },
+            ],
+          },
+          Policies: [
+            {
+              PolicyName: 'LambdaCognitoPolicy',
+              PolicyDocument: {
+                Version: '2012-10-17',
+                Statement: [
+                  {
+                    Effect: 'Allow',
+                    Action: [
+                      'logs:CreateLogGroup',
+                      'logs:CreateLogStream',
+                      'logs:PutLogEvents',
+                    ],
+                    Resource: 'arn:aws:logs:*:*:*',
+                  },
+                  {
+                    Effect: 'Allow',
+                    Action: [
+                      'cognito-idp:AdminCreateUser',
+                      'cognito-idp:AdminDeleteUser',
+                      'cognito-idp:AdminUpdateUserAttributes',
+                      'cognito-idp:AdminGetUser',
+                      'cognito-idp:ListUsers',
+                      'cognito-idp:AdminInitiateAuth',
+                      'cognito-idp:AdminRespondToAuthChallenge',
+                    ],
+                    Resource: '*',
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+      LambdaInvokePermission: {
+        Type: 'AWS::Lambda::Permission',
+        Properties: {
+          FunctionName: {
+            'Fn::GetAtt': ['EnforceMfaForMooDomainFunction', 'Arn'],
+          },
+          Action: 'lambda:InvokeFunction',
+          Principal: 'cognito-idp.amazonaws.com',
+          SourceArn: {
+            'Fn::GetAtt': ['CognitoUserPool', 'Arn'],
+          },
         },
       },
       CognitoUserPool: {
         Type: 'AWS::Cognito::UserPool',
         Properties: {
+          UsernameAttributes: ['email'],
           AccountRecoverySetting: {
             RecoveryMechanisms: [
               {
@@ -212,17 +377,8 @@ const serverlessConfiguration: AWS = {
               },
             ],
           },
-          AdminCreateUserConfig: {
-            InviteMessageTemplate: {
-              EmailMessage:
-                'Use the username {username} and the temporary password {####} to log in for the first time',
-              EmailSubject: 'Your Invitation to Join Our Service',
-            },
-            UnusedAccountValidityDays: 180,
-          },
-          AliasAttributes: ['email'],
           AutoVerifiedAttributes: ['email'],
-          DeletionProtection: 'ACTIVE',
+          DeletionProtection: 'INACTIVE',
           EmailVerificationMessage:
             'Thank you for signing up. Please click the link below to verify your email address: {####}',
           EmailVerificationSubject: 'Verify Your Email Address',
@@ -235,6 +391,7 @@ const serverlessConfiguration: AWS = {
               RequireNumbers: true,
               RequireSymbols: true,
               RequireUppercase: true,
+              TemporaryPasswordValidityDays: 2,
             },
           },
           Schema: [
@@ -247,27 +404,34 @@ const serverlessConfiguration: AWS = {
           ],
           UserPoolName: 'MyUserPool',
           VerificationMessageTemplate: {
-            EmailMessage:
-              'Welcome to AwesomeApp! Click the link below to verify your email address: {####}. If you did not sign up for AwesomeApp, you can safely ignore this email.',
-            EmailMessageByLink:
-              "Welcome to AwesomeApp! Click the link below to verify your email address: <a href='{##Verify Email##}'>Verify Email</a>. If you did not sign up for AwesomeApp, you can safely ignore this email.",
-            EmailSubject: 'Verify your email for AwesomeApp',
-            EmailSubjectByLink: 'Verify your email for AwesomeApp',
-            SmsMessage:
-              'Welcome to AwesomeApp! Your verification code is {####}.',
+            DefaultEmailOption: 'CONFIRM_WITH_LINK',
+          },
+          LambdaConfig: {
+            PreSignUp: {
+              'Fn::GetAtt': ['EnforceMfaForMooDomainFunction', 'Arn'],
+            },
+            CustomMessage: {
+              'Fn::GetAtt': ['CustomMessageLambdaFunction', 'Arn'],
+            },
+            PostConfirmation: {
+              'Fn::GetAtt': ['PostConfirmationTriggerLambda', 'Arn'],
+            },
           },
         },
       },
       CognitoUserPoolClient: {
         Type: 'AWS::Cognito::UserPoolClient',
         Properties: {
-          AccessTokenValidity: 1440,
+          AccessTokenValidity: 24,
           AllowedOAuthFlows: ['code'],
           AllowedOAuthFlowsUserPoolClient: true,
           AllowedOAuthScopes: ['openid', 'email', 'profile'],
-          CallbackURLs: ['https://example.com/callback'],
+          CallbackURLs: [
+            `https://${fullDomainName}/callback`,
+            `https://${fullDomainName}/welcome`,
+          ],
           ClientName: 'MyAppClient',
-          DefaultRedirectURI: 'https://example.com/welcome',
+          DefaultRedirectURI: `https://${fullDomainName}/welcome`,
           EnablePropagateAdditionalUserContextData: false,
           EnableTokenRevocation: true,
           ExplicitAuthFlows: [
@@ -276,10 +440,10 @@ const serverlessConfiguration: AWS = {
           ],
           GenerateSecret: false,
           IdTokenValidity: 24,
-          LogoutURLs: ['https://example.com/logout'],
+          LogoutURLs: [`https://${fullDomainName}/logout`],
           PreventUserExistenceErrors: 'ENABLED',
           ReadAttributes: ['email', 'custom:language'],
-          RefreshTokenValidity: 30,
+          RefreshTokenValidity: sessionDuration,
           SupportedIdentityProviders: ['COGNITO'],
           TokenValidityUnits: {
             AccessToken: 'hours',
@@ -292,18 +456,46 @@ const serverlessConfiguration: AWS = {
           WriteAttributes: ['email', 'custom:language'],
         },
       },
-      UserPoolUICustomization: {
-        Type: 'AWS::Cognito::UserPoolUICustomizationAttachment',
+      CognitoUserPoolRiskConfiguration: {
+        Type: 'AWS::Cognito::UserPoolRiskConfigurationAttachment',
         Properties: {
-          UserPoolId: {
-            Ref: 'CognitoUserPool',
+          UserPoolId: { Ref: 'CognitoUserPool' },
+          ClientId: 'ALL',
+          CompromisedCredentialsRiskConfiguration: {
+            Actions: {
+              EventAction: 'BLOCK',
+            },
           },
-          ClientId: {
-            Ref: 'CognitoUserPoolClient',
+          AccountTakeoverRiskConfiguration: {
+            Actions: {
+              HighAction: {
+                EventAction: 'BLOCK',
+                Notify: true,
+              },
+              MediumAction: {
+                EventAction: 'MFA_IF_CONFIGURED',
+                Notify: true,
+              },
+              LowAction: {
+                EventAction: 'NO_ACTION',
+                Notify: false,
+              },
+            },
           },
-          CSS: '.banner-customizable { background: linear-gradient(#9940B8, #C27BDB) }',
         },
       },
+      // UserPoolUICustomization: {
+      //   Type: 'AWS::Cognito::UserPoolUICustomizationAttachment',
+      //   Properties: {
+      //     UserPoolId: {
+      //       Ref: 'CognitoUserPool',
+      //     },
+      //     ClientId: {
+      //       Ref: 'CognitoUserPoolClient',
+      //     },
+      //     CSS: '.banner-customizable { background: linear-gradient(#9940B8, #C27BDB) }',
+      //   },
+      // },
       AdminUserGroup: {
         Type: 'AWS::Cognito::UserPoolGroup',
         Properties: {
@@ -344,9 +536,12 @@ const serverlessConfiguration: AWS = {
             {
               CloudWatchLogsConfiguration: {
                 LogGroupArn: {
-                  Ref: 'CognitoLogGroup',
+                  'Fn::Sub':
+                    'arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:${CognitoLogGroup}',
                 },
               },
+              LogLevel: 'ERROR',
+              EventSource: 'userNotification',
             },
           ],
         },
@@ -354,14 +549,14 @@ const serverlessConfiguration: AWS = {
       Certificate: {
         Type: 'AWS::CertificateManager::Certificate',
         Properties: {
-          DomainName: 'auth.agarwal.la',
+          DomainName: `auth.${fullDomainName}`,
           ValidationMethod: 'DNS',
         },
       },
       UserPoolDomain: {
         Type: 'AWS::Cognito::UserPoolDomain',
         Properties: {
-          Domain: `auth.${parentDomain}`,
+          Domain: `auth.${fullDomainName}`,
           UserPoolId: {
             Ref: 'CognitoUserPool',
           },
@@ -371,18 +566,78 @@ const serverlessConfiguration: AWS = {
             },
           },
         },
+        DependsOn: ['DNSRecordForCloudFront'],
       },
       DNSRecord: {
         Type: 'AWS::Route53::RecordSet',
         Properties: {
           HostedZoneId: hostedZoneId,
-          Name: `auth.${parentDomain}`,
+          Name: `auth.${fullDomainName}`,
           Type: 'A',
           AliasTarget: {
             DNSName: {
               'Fn::GetAtt': ['UserPoolDomain', 'CloudFrontDistribution'],
             },
             HostedZoneId: 'Z2FDTNDATAQYW2',
+          },
+        },
+      },
+      CustomMessageLambdaFunction: {
+        Type: 'AWS::Lambda::Function',
+        Properties: {
+          Handler: 'index.handler',
+          Role: {
+            'Fn::GetAtt': ['LambdaExecutionRole', 'Arn'],
+          },
+          Architectures: ['arm64'],
+          Code: {
+            ZipFile: `
+              exports.handler = async (event) => {
+                const userAttributes = event.request.userAttributes;
+                const codeParameter = event.request.codeParameter;
+                const usernameParameter = event.request.usernameParameter;
+                const requestJson = JSON.stringify(event.request, null, 2);
+
+                switch (event.triggerSource) {
+                    case 'CustomMessage_SignUp':
+                        event.response.emailSubject = "Welcome!";
+                        event.response.emailMessage = \`${jsesc(readFileSync('etc/emails/custommessage_signup.html', 'utf-8'))}\`.replace(/{{(.*?)}}/g, (match, p1) => event.request[p1]);
+                        break;
+
+                    case 'CustomMessage_AdminCreateUser':
+                        event.response.emailSubject = "You've been invited";
+                        event.response.emailMessage = \`${jsesc(readFileSync('etc/emails/custommessage_admincreateuser.html', 'utf-8'))}\`.replace(/{{(.*?)}}/g, (match, p1) => event.request[p1]);
+                        break;
+
+                    case 'CustomMessage_ResendCode':
+                        event.response.emailSubject = "Your Verification Code resent";
+                        event.response.emailMessage = \`${jsesc(readFileSync('etc/emails/custommessage_resendcode.html', 'utf-8'))}\`.replace(/{{(.*?)}}/g, (match, p1) => event.request[p1]);
+                        break;
+
+                    case 'CustomMessage_ForgotPassword':
+                        event.response.emailSubject = "Password Reset Requests";
+                        event.response.emailMessage = \`${jsesc(readFileSync('etc/emails/custommessage_forgotpassword.html', 'utf-8'))}\`.replace(/{{(.*?)}}/g, (match, p1) => event.request[p1]);
+                }
+
+                return event;
+              };
+            `,
+          },
+          Runtime: `nodejs${packageJson.engines.node}`,
+          MemorySize: 128,
+          Timeout: 10,
+        },
+      },
+      CustomMessageLambdaFunctionInvokePermission: {
+        Type: 'AWS::Lambda::Permission',
+        Properties: {
+          FunctionName: {
+            'Fn::GetAtt': ['CustomMessageLambdaFunction', 'Arn'],
+          },
+          Action: 'lambda:InvokeFunction',
+          Principal: 'cognito-idp.amazonaws.com',
+          SourceArn: {
+            'Fn::GetAtt': ['CognitoUserPool', 'Arn'],
           },
         },
       },
