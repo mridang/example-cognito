@@ -256,6 +256,7 @@ const serverlessConfiguration: AWS = {
       PostConfirmationTriggerLambda: {
         Type: 'AWS::Lambda::Function',
         Properties: {
+          FunctionName: `${packageJson.name}-\${self:provider.stage}-cognito-trigger-post-confirmation`,
           Handler: 'index.handler',
           Role: {
             'Fn::GetAtt': ['PostConfirmationTriggerLambdaExecutionRole', 'Arn'],
@@ -271,6 +272,9 @@ const serverlessConfiguration: AWS = {
           Runtime: `nodejs${packageJson.engines.node}`,
           MemorySize: 128,
           Timeout: 10,
+          TracingConfig: {
+            Mode: 'Active',
+          },
         },
       },
       PostConfirmationTriggerLambdaExecutionRole: {
@@ -328,6 +332,7 @@ const serverlessConfiguration: AWS = {
       PreSignUpTriggerLambda: {
         Type: 'AWS::Lambda::Function',
         Properties: {
+          FunctionName: `${packageJson.name}-\${self:provider.stage}-cognito-trigger-pre-signup`,
           Handler: 'index.handler',
           Role: {
             'Fn::GetAtt': ['LambdaExecutionRole', 'Arn'],
@@ -343,6 +348,9 @@ const serverlessConfiguration: AWS = {
           Runtime: `nodejs${packageJson.engines.node}`,
           MemorySize: 128,
           Timeout: 10,
+          TracingConfig: {
+            Mode: 'Active',
+          },
         },
       },
       LambdaExecutionRole: {
@@ -473,12 +481,17 @@ const serverlessConfiguration: AWS = {
           AccessTokenValidity: 24,
           AllowedOAuthFlows: ['code'],
           AllowedOAuthFlowsUserPoolClient: true,
-          AllowedOAuthScopes: ['openid', 'email', 'profile'],
+          AllowedOAuthScopes: [
+            'openid',
+            'email',
+            'profile',
+            'aws.cognito.signin.user.admin',
+          ],
           CallbackURLs: [
             `https://${fullDomainName}/callback`,
             `https://${fullDomainName}/welcome`,
           ],
-          ClientName: 'MyAppClient',
+          ClientName: 'Web',
           DefaultRedirectURI: `https://${fullDomainName}/welcome`,
           EnablePropagateAdditionalUserContextData: false,
           EnableTokenRevocation: true,
@@ -490,7 +503,13 @@ const serverlessConfiguration: AWS = {
           IdTokenValidity: 24,
           LogoutURLs: [`https://${fullDomainName}/logout`],
           PreventUserExistenceErrors: 'ENABLED',
-          ReadAttributes: ['email', 'custom:language'],
+          ReadAttributes: [
+            'email',
+            'given_name',
+            'family_name',
+            'locale',
+            'custom:language',
+          ],
           RefreshTokenValidity: sessionDuration,
           SupportedIdentityProviders: ['COGNITO'],
           TokenValidityUnits: {
@@ -501,7 +520,13 @@ const serverlessConfiguration: AWS = {
           UserPoolId: {
             Ref: 'CognitoUserPool',
           },
-          WriteAttributes: ['email', 'custom:language'],
+          WriteAttributes: [
+            'email',
+            'given_name',
+            'family_name',
+            'locale',
+            'custom:language',
+          ],
         },
       },
       CognitoUserPoolRiskConfiguration: {
@@ -633,6 +658,7 @@ const serverlessConfiguration: AWS = {
       CustomMessageLambda: {
         Type: 'AWS::Lambda::Function',
         Properties: {
+          FunctionName: `${packageJson.name}-\${self:provider.stage}-cognito-trigger-custom-message`,
           Handler: 'index.handler',
           Role: {
             'Fn::GetAtt': ['LambdaExecutionRole', 'Arn'],
@@ -675,6 +701,9 @@ const serverlessConfiguration: AWS = {
           Runtime: `nodejs${packageJson.engines.node}`,
           MemorySize: 128,
           Timeout: 10,
+          TracingConfig: {
+            Mode: 'Active',
+          },
         },
       },
       CustomMessageLambdaInvokePermission: {

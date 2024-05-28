@@ -31,7 +31,7 @@ export class AuthController {
   @Get('login')
   login(@Res() res: Response): void {
     res.redirect(
-      `${cognitoConfig.cognitoAuthDomain}/login?response_type=code&client_id=${cognitoConfig.poolClientId}&redirect_uri=${cognitoConfig.postCallbackUri}&scope=openid+profile+email`,
+      `${cognitoConfig.cognitoAuthDomain}/login?response_type=code&client_id=${cognitoConfig.poolClientId}&redirect_uri=${cognitoConfig.postCallbackUri}&scope=openid+profile+email+aws.cognito.signin.user.admin`,
     );
   }
 

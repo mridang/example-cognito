@@ -1,4 +1,4 @@
 export type UpdateProfileDto = {
-  givenName: string;
-  familyName: string;
+  given_name: string;
+  family_name: string;
 };

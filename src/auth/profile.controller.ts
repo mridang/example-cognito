@@ -1,5 +1,4 @@
-// src/profile/profile.controller.ts
-import { Controller, Body, Req, Get, Render, Res } from '@nestjs/common';
+import { Body, Controller, Get, Post, Render, Req, Res } from '@nestjs/common';
 import {
   CognitoIdentityProviderClient,
   GetUserCommand,
@@ -13,48 +12,45 @@ export class ProfileController {
   private cognitoClient: CognitoIdentityProviderClient;
 
   constructor() {
-    this.cognitoClient = new CognitoIdentityProviderClient({
-      region: 'YOUR_AWS_REGION',
-    });
+    this.cognitoClient = new CognitoIdentityProviderClient();
   }
 
   @Get()
   @Render('profile')
   async getUpdatePage(@Req() req: Request) {
-    console.log(JSON.stringify(req.user));
-    // @ts-expect-error dffgs gssf
-    const accessToken = req.user.signInUserSession.accessToken.jwtToken;
+    const accessToken = req.cookies['at'];
+    const userData = await this.cognitoClient.send(
+      new GetUserCommand({ AccessToken: accessToken }),
+    );
 
-    const command = new GetUserCommand({ AccessToken: accessToken });
-    const userData = await this.cognitoClient.send(command);
-
-    console.log(JSON.stringify(userData));
-
-    return {
-      givenName: 'moo',
-      familyName: 'mm',
-    };
+    return (
+      userData.UserAttributes?.reduce(
+        (acc, { Name, Value }) => (Name ? { ...acc, [Name]: Value } : acc),
+        {
+          //
+        },
+      ) || {}
+    );
   }
 
+  @Post()
   async updateProfile(
     @Req() req: Request,
     @Res() res: Response,
     @Body() updateProfileDto: UpdateProfileDto,
   ) {
-    const { givenName, familyName } = updateProfileDto;
-    // @ts-expect-error dggegege
-    const accessToken = req.user.signInUserSession.accessToken.jwtToken;
+    const accessToken = req.cookies['at'];
+    console.log(JSON.stringify(updateProfileDto));
 
-    const updateParams = {
-      AccessToken: accessToken,
-      UserAttributes: [
-        { Name: 'given_name', Value: givenName },
-        { Name: 'family_name', Value: familyName },
-      ],
-    };
-
-    const updateCommand = new UpdateUserAttributesCommand(updateParams);
-    await this.cognitoClient.send(updateCommand);
+    await this.cognitoClient.send(
+      new UpdateUserAttributesCommand({
+        AccessToken: accessToken,
+        UserAttributes: [
+          { Name: 'given_name', Value: updateProfileDto.given_name },
+          { Name: 'family_name', Value: updateProfileDto.family_name },
+        ],
+      }),
+    );
 
     // // Refresh tokens after updating profile
     // const refreshToken = req.user.signInUserSession.refreshToken.token;
