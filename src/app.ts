@@ -6,7 +6,7 @@ import fs from 'fs';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import serverTiming from 'server-timing';
 
 export default function configure(nestApp: NestExpressApplication) {
@@ -33,6 +33,14 @@ export default function configure(nestApp: NestExpressApplication) {
   nestApp.use('/robots.txt', (req: Request, res: Response) => {
     res.type('text/plain');
     res.send('User-agent: *\nDisallow: /');
+  });
+  nestApp.use((req: Request, res: Response, next: NextFunction) => {
+    res.setHeader(
+      'X-Lambda-Start',
+      process.env.LAMBDA_COLD_START === 'true' ? 'Cold' : 'Warm',
+    );
+    process.env.LAMBDA_COLD_START = 'false';
+    next();
   });
   nestApp.use(serverTiming());
   nestApp.use(cookieParser());

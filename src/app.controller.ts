@@ -39,6 +39,14 @@ export class AppController {
   }
 
   @Public()
+  @Get('debugme')
+  checkme() {
+    return {
+      //
+    };
+  }
+
+  @Public()
   @Get('health')
   @HealthCheck()
   check() {
