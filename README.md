@@ -4,6 +4,10 @@ Cognito just feels like a tier 2 offering and has rather cryptic documentation.
 While it has been around for a few years, it is still as clunky to set up
 as ever.
 
+You can't change required attributes after you create a user pool.
+
+Mfa can't be changed,.
+
 ### Demo
 
 To play around with Cognito, visit https://example-cognito.agarwal.la/ and

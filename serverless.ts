@@ -444,6 +444,18 @@ const serverlessConfiguration: AWS = {
           },
           Schema: [
             {
+              Name: 'family_name',
+              AttributeDataType: 'String',
+              Mutable: true,
+              Required: true,
+            },
+            {
+              Name: 'given_name',
+              AttributeDataType: 'String',
+              Mutable: true,
+              Required: true,
+            },
+            {
               Name: 'language',
               AttributeDataType: 'String',
               Mutable: true,

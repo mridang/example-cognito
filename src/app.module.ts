@@ -11,11 +11,16 @@ import getSecret from './utils/secrets';
 import { secretName } from './constants';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { AuthModule } from './auth/auth.module';
+import { ClsModule } from 'nestjs-cls';
+import { PowertoolsLoggerService } from './app.logger';
 
 @Global()
 @Module({
   imports: [
     AuthModule,
+    ClsModule.forRoot({
+      global: true,
+    }),
     HttpModule,
     TerminusModule,
     SentryModule.forRootAsync({
@@ -54,6 +59,7 @@ import { AuthModule } from './auth/auth.module';
   ],
   controllers: [AppController],
   providers: [
+    PowertoolsLoggerService,
     {
       provide: 'ENV_PATH',
       useValue: process.env.ENV_PATH || path.resolve(process.cwd(), '.env'),
