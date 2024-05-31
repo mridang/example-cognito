@@ -271,10 +271,24 @@ const serverlessConfiguration: AWS = {
           Architectures: ['arm64'],
           Code: {
             ZipFile: `
-          exports.handler = async (event) => {
-            return event;
-          };
-        `,
+              const { CognitoIdentityProviderClient, AdminAddUserToGroupCommand } = require("@aws-sdk/client-cognito-identity-provider");
+              const cognitoClient = new CognitoIdentityProviderClient();
+              
+              exports.handler = async (event) => {
+                  if (event.request.userAttributes.email.endsWith('@nosto.com')) {
+                      try {
+                          await cognitoClient.send(new AdminAddUserToGroupCommand({
+                              GroupName: 'AdminUsers',
+                              UserPoolId: event.userPoolId,
+                              Username: event.userName
+                          }));
+                      } catch (error) {
+                          throw new Error('Error adding user to group');
+                      }
+                  }
+              
+                  return event;
+              };`,
           },
           Runtime: `nodejs${packageJson.engines.node}`,
           MemorySize: 128,
@@ -328,6 +342,119 @@ const serverlessConfiguration: AWS = {
         Properties: {
           FunctionName: {
             'Fn::GetAtt': ['PostConfirmationTriggerLambda', 'Arn'],
+          },
+          Action: 'lambda:InvokeFunction',
+          Principal: 'cognito-idp.amazonaws.com',
+          SourceArn: {
+            'Fn::GetAtt': ['CognitoUserPool', 'Arn'],
+          },
+        },
+      },
+      PreTokenGenerationTriggerLambda: {
+        Type: 'AWS::Lambda::Function',
+        Properties: {
+          FunctionName: `${packageJson.name}-\${self:provider.stage}-cognito-trigger-pre-tokengen`,
+          Handler: 'index.handler',
+          Role: {
+            'Fn::GetAtt': [
+              'PreTokenGenerationTriggerLambdaExecutionRole',
+              'Arn',
+            ],
+          },
+          Architectures: ['arm64'],
+          Code: {
+            ZipFile: `
+              const { CognitoIdentityProviderClient, AdminGetUserCommand } = require("@aws-sdk/client-cognito-identity-provider");
+              const cognitoClient = new CognitoIdentityProviderClient();
+              
+              exports.handler = async (event) => {
+                  try {
+                      const user = await cognitoClient.send(new AdminGetUserCommand({
+                          UserPoolId: event.userPoolId,
+                          Username: event.userName
+                      }));
+
+                      const groupsResponse = await cognitoClient.send(new AdminListGroupsForUserCommand({
+                          UserPoolId: event.userPoolId,
+                          Username: event.userName
+                      }));
+              
+                      const groupClaims = groupsResponse.Groups.reduce((claims, group) => {
+                          claims['custom:group_' + group.GroupName.toLowerCase()] = '1';
+                          return claims;
+                      }, {});
+              
+                      return {
+                          ...event,
+                          response: {
+                              claimsOverrideDetails: {
+                                  claimsToAddOrOverride: {
+                                      ...groupClaims,
+                                      'custom:mfa_enabled': (user.UserMFASettingList && user.UserMFASettingList.includes('SOFTWARE_TOKEN_MFA')).toString()
+                                  }
+                              }
+                          }
+                      };
+                  } catch {
+                      throw new Error('Error checking MFA status');
+                  }
+              };`,
+          },
+          Runtime: `nodejs${packageJson.engines.node}`,
+          MemorySize: 128,
+          Timeout: 10,
+          TracingConfig: {
+            Mode: 'Active',
+          },
+        },
+      },
+      PreTokenGenerationTriggerLambdaExecutionRole: {
+        Type: 'AWS::IAM::Role',
+        Properties: {
+          AssumeRolePolicyDocument: {
+            Version: '2012-10-17',
+            Statement: [
+              {
+                Effect: 'Allow',
+                Principal: { Service: 'lambda.amazonaws.com' },
+                Action: 'sts:AssumeRole',
+              },
+            ],
+          },
+          Policies: [
+            {
+              PolicyName: 'LambdaCognitoPolicy',
+              PolicyDocument: {
+                Version: '2012-10-17',
+                Statement: [
+                  {
+                    Effect: 'Allow',
+                    Action: [
+                      'logs:CreateLogGroup',
+                      'logs:CreateLogStream',
+                      'logs:PutLogEvents',
+                    ],
+                    Resource: 'arn:aws:logs:*:*:*',
+                  },
+                  {
+                    Effect: 'Allow',
+                    Action: [
+                      'cognito-idp:AdminGetUser',
+                      'cognito-idp:AdminListGroupsForUser',
+                    ],
+                    Resource: '*',
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+      PreTokenGenerationTriggerLambdaInvokePermission: {
+        Type: 'AWS::Lambda::Permission',
+        Properties: {
+          FunctionName: {
+            'Fn::GetAtt': ['PreTokenGenerationTriggerLambda', 'Arn'],
           },
           Action: 'lambda:InvokeFunction',
           Principal: 'cognito-idp.amazonaws.com',
@@ -482,6 +609,9 @@ const serverlessConfiguration: AWS = {
             DefaultEmailOption: 'CONFIRM_WITH_CODE',
           },
           LambdaConfig: {
+            PreTokenGeneration: {
+              'Fn::GetAtt': ['PreTokenGenerationTriggerLambda', 'Arn'],
+            },
             PreSignUp: {
               'Fn::GetAtt': ['PreSignUpTriggerLambda', 'Arn'],
             },
