@@ -27,38 +27,39 @@ class TestDTO {
 
 @Controller()
 class DynamicController {
-  @Public()
   @Get('500')
+  @Public()
   get500() {
     throw new Error('500 error');
   }
 
-  @Public()
   @Get('error')
+  @Public()
   getError() {
     throw new InternalServerErrorException('General error');
   }
 
-  @Public()
   @Get('set-cookie')
-  setCookie(@Res() res: Response) {
-    res.cookie('test', 'NestJS').send('Cookie is set');
+  @Public()
+  setCookie(@Res({ passthrough: true }) res: Response) {
+    res.cookie('test', 'NestJS');
+    return 'Okie';
   }
 
-  @Public()
   @Get('read-cookie')
+  @Public()
   readCookie(@Req() req: Request) {
     return req.cookies['test'] || 'No cookie found';
   }
 
-  @Public()
   @Get('cors-test')
+  @Public()
   getCorsTest() {
     return { message: 'CORS is enabled' };
   }
 
-  @Public()
   @Post('validate')
+  @Public()
   validateTest(@Body() testDto: TestDTO) {
     return testDto;
   }
@@ -164,6 +165,17 @@ describe('app.controller test', () => {
       .expect((res) => {
         expect(res.headers['x-dns-prefetch-control']).toBeDefined();
         expect(res.headers['x-frame-options']).toBeDefined();
+      });
+  });
+
+  it('should have the Server-Timing header', async () => {
+    await request(testModule.app.getHttpServer())
+      .get('/health')
+      .expect(HttpStatus.OK)
+      .expect((res) => {
+        expect(res.headers['server-timing']).toMatch(
+          /total;dur=\d+(\.\d+)?;desc="App Total"/,
+        );
       });
   });
 

@@ -13,6 +13,7 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import { AuthModule } from './auth/auth.module';
 import { ClsModule } from 'nestjs-cls';
 import { PowertoolsLoggerService } from './app.logger';
+import { TimingInterceptor } from './timing.interceptor';
 
 @Global()
 @Module({
@@ -69,6 +70,10 @@ import { PowertoolsLoggerService } from './app.logger';
       useFactory: () => {
         return new SecretsManagerClient();
       },
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: TimingInterceptor,
     },
     {
       provide: APP_INTERCEPTOR,
