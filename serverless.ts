@@ -84,6 +84,13 @@ const serverlessConfiguration: AWS = {
               ],
             },
           },
+          {
+            Effect: 'Allow',
+            Action: ['cognito-idp:AdminSetUserMFAPreference'],
+            Resource: {
+              'Fn::GetAtt': ['CognitoUserPool', 'Arn'],
+            },
+          },
         ],
       },
     },

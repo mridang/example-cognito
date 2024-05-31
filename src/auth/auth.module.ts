@@ -7,10 +7,11 @@ import { JwtAuthGuard } from './auth.guard';
 import { AuthController } from './auth.controller';
 import { HttpModule } from '@nestjs/axios';
 import { ProfileController } from './profile.controller';
+import { MfaController } from './totp.controller';
 
 @Module({
   imports: [PassportModule, JwtModule.register({}), HttpModule],
-  controllers: [AuthController, ProfileController],
+  controllers: [AuthController, ProfileController, MfaController],
   providers: [
     JwtStrategy,
     {
