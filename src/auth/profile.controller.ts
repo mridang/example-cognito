@@ -9,10 +9,10 @@ import { UpdateProfileDto } from './update-profile.dto';
 
 @Controller('profile')
 export class ProfileController {
-  private cognitoClient: CognitoIdentityProviderClient;
-
-  constructor() {
-    this.cognitoClient = new CognitoIdentityProviderClient();
+  constructor(
+    private readonly cognitoClient: CognitoIdentityProviderClient = new CognitoIdentityProviderClient(),
+  ) {
+    //
   }
 
   @Get()

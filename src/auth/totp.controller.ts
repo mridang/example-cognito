@@ -20,7 +20,11 @@ import cognitoConfig from './constants';
 
 @Controller('totp')
 export class MfaController {
-  private readonly cognitoClient = new CognitoIdentityProviderClient();
+  constructor(
+    private readonly cognitoClient: CognitoIdentityProviderClient = new CognitoIdentityProviderClient(),
+  ) {
+    //
+  }
 
   @Get('setup')
   @Render('totp')
