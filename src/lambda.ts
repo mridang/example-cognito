@@ -28,6 +28,7 @@ async function bootstrap() {
       },
     );
 
+    nestApp.useLogger(nestApp.get(PowertoolsLoggerService));
     configure(nestApp);
     await nestApp.init();
 
