@@ -407,7 +407,7 @@ const serverlessConfiguration: AWS = {
           ],
         },
       },
-      LambdaInvokePermission: {
+      PreSignUpTriggerLambdaInvokePermission: {
         Type: 'AWS::Lambda::Permission',
         Properties: {
           FunctionName: {
