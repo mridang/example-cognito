@@ -578,6 +578,18 @@ const serverlessConfiguration: AWS = {
           },
           Schema: [
             {
+              Name: 'email',
+              AttributeDataType: 'String',
+              Mutable: true,
+              Required: true,
+            },
+            {
+              Name: 'phone_number',
+              AttributeDataType: 'String',
+              Mutable: true,
+              Required: false,
+            },
+            {
               Name: 'family_name',
               AttributeDataType: 'String',
               Mutable: true,
@@ -588,6 +600,78 @@ const serverlessConfiguration: AWS = {
               AttributeDataType: 'String',
               Mutable: true,
               Required: true,
+            },
+            {
+              Name: 'middle_name',
+              AttributeDataType: 'String',
+              Mutable: true,
+              Required: false,
+            },
+            {
+              Name: 'nickname',
+              AttributeDataType: 'String',
+              Mutable: true,
+              Required: false,
+            },
+            {
+              Name: 'preferred_username',
+              AttributeDataType: 'String',
+              Mutable: true,
+              Required: false,
+            },
+            {
+              Name: 'address',
+              AttributeDataType: 'String',
+              Mutable: true,
+              Required: false,
+            },
+            {
+              Name: 'birthdate',
+              AttributeDataType: 'String',
+              Mutable: true,
+              Required: false,
+            },
+            {
+              Name: 'gender',
+              AttributeDataType: 'String',
+              Mutable: true,
+              Required: false,
+            },
+            {
+              Name: 'locale',
+              AttributeDataType: 'String',
+              Mutable: true,
+              Required: false,
+            },
+            {
+              Name: 'picture',
+              AttributeDataType: 'String',
+              Mutable: true,
+              Required: false,
+            },
+            {
+              Name: 'profile',
+              AttributeDataType: 'String',
+              Mutable: true,
+              Required: false,
+            },
+            {
+              Name: 'updated_at',
+              AttributeDataType: 'Number',
+              Mutable: true,
+              Required: false,
+            },
+            {
+              Name: 'website',
+              AttributeDataType: 'String',
+              Mutable: true,
+              Required: false,
+            },
+            {
+              Name: 'zoneinfo',
+              AttributeDataType: 'String',
+              Mutable: true,
+              Required: false,
             },
             {
               Name: 'language',
