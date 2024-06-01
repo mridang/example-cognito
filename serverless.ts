@@ -97,6 +97,17 @@ const serverlessConfiguration: AWS = {
   },
   resources: {
     Resources: {
+      LambdaOriginAccessControl: {
+        Type: 'AWS::CloudFront::OriginAccessControl',
+        Properties: {
+          OriginAccessControlConfig: {
+            Name: 'LambdaOAC',
+            OriginAccessControlOriginType: 'lambda',
+            SigningBehavior: 'always',
+            SigningProtocol: 'sigv4',
+          },
+        },
+      },
       EmailIdentity: {
         Type: 'AWS::SES::EmailIdentity',
         Properties: {
@@ -174,6 +185,9 @@ const serverlessConfiguration: AWS = {
                 CustomOriginConfig: {
                   HTTPSPort: 443,
                   OriginProtocolPolicy: 'https-only',
+                },
+                OriginAccessControlId: {
+                  Ref: 'LambdaOriginAccessControl',
                 },
               },
             ],
@@ -700,7 +714,7 @@ const serverlessConfiguration: AWS = {
               'Fn::GetAtt': ['PreSignUpTriggerLambda', 'Arn'],
             },
             CustomMessage: {
-              'Fn::GetAtt': ['CustomMessageLambda', 'Arn'],
+              'Fn::GetAtt': ['CustomMessageTriggerLambda', 'Arn'],
             },
             PostConfirmation: {
               'Fn::GetAtt': ['PostConfirmationTriggerLambda', 'Arn'],
@@ -888,7 +902,7 @@ const serverlessConfiguration: AWS = {
           },
         },
       },
-      CustomMessageLambda: {
+      CustomMessageTriggerLambda: {
         Type: 'AWS::Lambda::Function',
         Properties: {
           FunctionName: `${packageJson.name}-\${self:provider.stage}-cognito-trigger-custom-message`,
@@ -939,16 +953,38 @@ const serverlessConfiguration: AWS = {
           },
         },
       },
-      CustomMessageLambdaInvokePermission: {
+      CustomMessageTriggerLambdaInvokePermission: {
         Type: 'AWS::Lambda::Permission',
         Properties: {
           FunctionName: {
-            'Fn::GetAtt': ['CustomMessageLambda', 'Arn'],
+            'Fn::GetAtt': ['CustomMessageTriggerLambda', 'Arn'],
           },
           Action: 'lambda:InvokeFunction',
           Principal: 'cognito-idp.amazonaws.com',
           SourceArn: {
             'Fn::GetAtt': ['CognitoUserPool', 'Arn'],
+          },
+        },
+      },
+      ProbotLambdaPermissionFnUrl: {
+        Type: 'AWS::Lambda::Permission',
+        Properties: {
+          FunctionName: {
+            'Fn::GetAtt': ['ProbotLambdaFunction', 'Arn'],
+          },
+          Action: 'lambda:InvokeFunctionUrl',
+          Principal: '*',
+          FunctionUrlAuthType: 'NONE',
+          SourceArn: {
+            'Fn::Join': [
+              '',
+              [
+                'arn:aws:cloudfront::',
+                { Ref: 'AWS::AccountId' },
+                ':distribution/',
+                { Ref: 'CloudFrontDistribution' },
+              ],
+            ],
           },
         },
       },
