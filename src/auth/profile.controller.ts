@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Render, Req, Res } from '@nestjs/common';
+import { Body, Controller, Get, Post, Render, Req } from '@nestjs/common';
 import {
   CognitoIdentityProviderClient,
   GetUserCommand,
@@ -36,7 +36,6 @@ export class ProfileController {
   @Post()
   async updateProfile(
     @Req() req: Request,
-    @Res() res: Response,
     @Body() updateProfileDto: UpdateProfileDto,
   ) {
     const accessToken = req.cookies['at'];

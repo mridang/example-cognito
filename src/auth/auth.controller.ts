@@ -29,7 +29,7 @@ export class AuthController {
 
   @Public()
   @Get('login')
-  login(@Res() res: Response): void {
+  login(@Res({ passthrough: true }) res: Response): void {
     res.redirect(
       `${cognitoConfig.cognitoAuthDomain}/login?response_type=code&client_id=${cognitoConfig.poolClientId}&redirect_uri=${cognitoConfig.postCallbackUri}&scope=openid+profile+email+aws.cognito.signin.user.admin`,
     );
@@ -39,7 +39,7 @@ export class AuthController {
   @Get('callback')
   async handleCallback(
     @Req() req: Request,
-    @Res() res: Response,
+    @Res({ passthrough: true }) res: Response,
   ): Promise<void> {
     const { code } = req.query;
     if (typeof code === 'string') {
