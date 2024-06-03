@@ -717,7 +717,7 @@ const serverlessConfiguration: AWS = {
               Required: false,
             },
             {
-              Name: 'password_last_changed',
+              Name: 'password_changed_at',
               AttributeDataType: 'String',
               Mutable: true,
               Required: false,
@@ -785,7 +785,7 @@ const serverlessConfiguration: AWS = {
             'family_name',
             'locale',
             'custom:language',
-            'custom:password_last_changed',
+            'custom:password_changed_at',
           ],
           RefreshTokenValidity: sessionDuration,
           SupportedIdentityProviders: ['COGNITO'],
