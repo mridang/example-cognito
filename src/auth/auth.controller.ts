@@ -101,6 +101,7 @@ export class AuthController {
     }
   }
 
+  @Public()
   @Get('loggedout')
   loggedOut() {
     return "you're out";
@@ -110,7 +111,7 @@ export class AuthController {
   logout(@Res({ passthrough: true }) res: Response): void {
     res.clearCookie('jwt');
     res.clearCookie('at');
-    res.clearCookie('ref');
+    res.clearCookie('rt');
     res.redirect(
       `${cognitoConfig.cognitoAuthDomain}/logout?client_id=${cognitoConfig.poolClientId}&logout_uri=${cognitoConfig.postLogoutUri}`,
     );
