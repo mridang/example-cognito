@@ -427,13 +427,13 @@ const serverlessConfiguration: AWS = {
                               claimsOverrideDetails: {
                                   claimsToAddOrOverride: {
                                       ...groupClaims,
-                                      'custom:mfa_enabled': (user.UserMFASettingList && user.UserMFASettingList.includes('SOFTWARE_TOKEN_MFA')).toString()
+                                      'custom:mfa_enabled': ((user.UserMFASettingList?.includes('SOFTWARE_TOKEN_MFA')) ?? false).toString()
                                   }
                               }
                           }
                       };
-                  } catch (err) {
-                      throw new Error('Error checking MFA status', { cause: err });
+                  } catch {
+                      throw new Error('Error checking MFA status');
                   }
               };`,
           },
