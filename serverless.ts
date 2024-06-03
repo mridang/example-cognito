@@ -777,7 +777,7 @@ const serverlessConfiguration: AWS = {
           ],
           GenerateSecret: false,
           IdTokenValidity: 24,
-          LogoutURLs: [`https://${fullDomainName}/logout`],
+          LogoutURLs: [`https://${fullDomainName}/loggedout`],
           PreventUserExistenceErrors: 'ENABLED',
           ReadAttributes: [
             'email',
