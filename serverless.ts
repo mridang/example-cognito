@@ -401,7 +401,7 @@ const serverlessConfiguration: AWS = {
           Architectures: ['arm64'],
           Code: {
             ZipFile: `
-              const { CognitoIdentityProviderClient, AdminGetUserCommand } = require("@aws-sdk/client-cognito-identity-provider");
+              const { CognitoIdentityProviderClient, AdminGetUserCommand, AdminListGroupsForUserCommand } = require("@aws-sdk/client-cognito-identity-provider");
               const cognitoClient = new CognitoIdentityProviderClient();
               
               exports.handler = async (event) => {
@@ -432,8 +432,8 @@ const serverlessConfiguration: AWS = {
                               }
                           }
                       };
-                  } catch {
-                      throw new Error('Error checking MFA status');
+                  } catch (err) {
+                      throw new Error('Error checking MFA status', { cause: err });
                   }
               };`,
           },
