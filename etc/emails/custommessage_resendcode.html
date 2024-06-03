@@ -490,10 +490,11 @@
                       <div class="f-fallback">
                         <h1>Hi,</h1>
                         <p>
-                          You email address isn't verified. Use the button below
+                          You email address isn't verified.
+                          Use the code below
                           to verify it.
                           <strong
-                            >This password reset is only valid for the next 24
+                            >This one-time code is only valid for the next 24
                             hours.</strong
                           >
                         </p>
@@ -506,33 +507,20 @@
                           cellspacing="0"
                           role="presentation"
                         >
+                          <tbody>
                           <tr>
-                            <td align="center">
-                              <!-- Border based button
-       https://litmus.com/blog/a-guide-to-bulletproof-buttons-in-email-design -->
-                              <table
-                                width="100%"
-                                border="0"
-                                cellspacing="0"
-                                cellpadding="0"
-                                role="presentation"
-                              >
-                                <tr>
-                                  <td align="center">
-                                    <a
-                                      href="{{linkParameter}}"
-                                      class="f-fallback button button--green"
-                                      target="_blank"
-                                      >Reset your password</a
-                                    >
-                                  </td>
-                                </tr>
-                              </table>
+                            <td class="attributes_item">
+                                        <span class="f-fallback">
+                                          <center>
+                                            <strong>{{codeParameter}}</strong>
+                                          </center>
+                                        </span>
                             </td>
                           </tr>
+                          </tbody>
                         </table>
                         <p>
-                          If you did not sign up, please ignore this email or
+                          If you did not initiate this, please ignore this email or
                           <a href="mailto:support@agarwal.la"
                             >contact support</a
                           >
