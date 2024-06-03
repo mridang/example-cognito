@@ -1,8 +1,10 @@
 import {
+  BadRequestException,
   Controller,
   Get,
   HttpException,
   HttpStatus,
+  InternalServerErrorException,
   Render,
   Req,
   Res,
@@ -90,14 +92,12 @@ export class AuthController {
         res.redirect('/');
       } catch (error) {
         console.error('Error exchanging authorization code: ', error);
-        res
-          .status(HttpStatus.INTERNAL_SERVER_ERROR)
-          .send('Failed to exchange authorization code.');
+        throw new InternalServerErrorException(
+          'Failed to exchange authorization code.',
+        );
       }
     } else {
-      res
-        .status(HttpStatus.BAD_REQUEST)
-        .send('Invalid request: No code provided.');
+      throw new BadRequestException('Invalid request: No code provided.');
     }
   }
 
