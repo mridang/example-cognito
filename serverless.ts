@@ -299,7 +299,7 @@ const serverlessConfiguration: AWS = {
                               Username: event.userName,
                               UserAttributes: [
                                   {
-                                      Name: 'custom:password_last_changed',
+                                      Name: 'custom:password_changed_at',
                                       Value: new Date().toISOString()
                                   }
                               ]
