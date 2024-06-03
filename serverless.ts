@@ -13,7 +13,10 @@ const sessionDuration = 30;
 const serverlessConfiguration: AWS = {
   service: packageJson.name,
   frameworkVersion: '3',
-  plugins: ['serverless-plugin-typescript'],
+  plugins: [
+    'serverless-plugin-typescript',
+    '@mridang/serverless-checkov-plugin',
+  ],
   package: {
     individually: false,
     patterns: [
@@ -289,6 +292,23 @@ const serverlessConfiguration: AWS = {
               const cognitoClient = new CognitoIdentityProviderClient();
               
               exports.handler = async (event) => {
+                  if (event.triggerSource === 'PostConfirmation_ConfirmForgotPassword' || event.triggerSource === 'PostConfirmation_ConfirmSignUp') {
+                      try {
+                          await cognitoClient.send(new AdminUpdateUserAttributesCommand({
+                              UserPoolId: event.userPoolId,
+                              Username: event.userName,
+                              UserAttributes: [
+                                  {
+                                      Name: 'custom:password_last_changed',
+                                      Value: new Date().toISOString()
+                                  }
+                              ]
+                          }));
+                      } catch (error) {
+                          throw new Error('Error updating password last changed attribute: ' + error.message);
+                      }
+                  }
+
                   if (event.request.userAttributes.email.endsWith('@nosto.com')) {
                       try {
                           await cognitoClient.send(new AdminAddUserToGroupCommand({
@@ -342,7 +362,10 @@ const serverlessConfiguration: AWS = {
                   },
                   {
                     Effect: 'Allow',
-                    Action: ['cognito-idp:AdminAddUserToGroup'],
+                    Action: [
+                      'cognito-idp:AdminAddUserToGroup',
+                      'cognito-idp:AdminUpdateUserAttributes',
+                    ],
                     Resource: '*',
                   },
                 ],
@@ -693,6 +716,12 @@ const serverlessConfiguration: AWS = {
               Mutable: true,
               Required: false,
             },
+            {
+              Name: 'password_last_changed',
+              AttributeDataType: 'String',
+              Mutable: true,
+              Required: false,
+            },
           ],
           UserPoolName: 'MyUserPool',
           // EmailConfiguration: {
@@ -756,6 +785,7 @@ const serverlessConfiguration: AWS = {
             'family_name',
             'locale',
             'custom:language',
+            'custom:password_last_changed',
           ],
           RefreshTokenValidity: sessionDuration,
           SupportedIdentityProviders: ['COGNITO'],

@@ -66,6 +66,7 @@
     "ip": "2.0.1"
   },
   "devDependencies": {
+    "@mridang/serverless-checkov-plugin": "^0.3.0",
     "@nestjs/cli": "^10.3.2",
     "@nestjs/testing": "^10.3.3",
     "@serverless/typescript": "^3.38.0",
