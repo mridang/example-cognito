@@ -288,7 +288,7 @@ const serverlessConfiguration: AWS = {
           Architectures: ['arm64'],
           Code: {
             ZipFile: `
-              const { CognitoIdentityProviderClient, AdminAddUserToGroupCommand } = require("@aws-sdk/client-cognito-identity-provider");
+              const { CognitoIdentityProviderClient, AdminAddUserToGroupCommand, AdminUpdateUserAttributesCommand } = require("@aws-sdk/client-cognito-identity-provider");
               const cognitoClient = new CognitoIdentityProviderClient();
               
               exports.handler = async (event) => {
