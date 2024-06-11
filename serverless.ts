@@ -16,6 +16,7 @@ const serverlessConfiguration: AWS = {
   plugins: [
     'serverless-plugin-typescript',
     '@mridang/serverless-checkov-plugin',
+    '@mridang/serverless-shortsha-plugin',
   ],
   package: {
     individually: false,
@@ -290,7 +291,7 @@ const serverlessConfiguration: AWS = {
             ZipFile: `
               const { CognitoIdentityProviderClient, AdminAddUserToGroupCommand, AdminUpdateUserAttributesCommand } = require("@aws-sdk/client-cognito-identity-provider");
               const cognitoClient = new CognitoIdentityProviderClient();
-              
+
               exports.handler = async (event) => {
                   if (event.triggerSource === 'PostConfirmation_ConfirmForgotPassword' || event.triggerSource === 'PostConfirmation_ConfirmSignUp') {
                       try {
@@ -320,7 +321,7 @@ const serverlessConfiguration: AWS = {
                           throw new Error('Error adding user to group');
                       }
                   }
-              
+
                   return event;
               };`,
           },
@@ -403,7 +404,7 @@ const serverlessConfiguration: AWS = {
             ZipFile: `
               const { CognitoIdentityProviderClient, AdminGetUserCommand, AdminListGroupsForUserCommand } = require("@aws-sdk/client-cognito-identity-provider");
               const cognitoClient = new CognitoIdentityProviderClient();
-              
+
               exports.handler = async (event) => {
                   try {
                       const user = await cognitoClient.send(new AdminGetUserCommand({
@@ -415,12 +416,12 @@ const serverlessConfiguration: AWS = {
                           UserPoolId: event.userPoolId,
                           Username: event.userName
                       }));
-              
+
                       const groupClaims = groupsResponse.Groups.reduce((claims, group) => {
                           claims['custom:group_' + group.GroupName.toLowerCase()] = '1';
                           return claims;
                       }, {});
-              
+
                       return {
                           ...event,
                           response: {
