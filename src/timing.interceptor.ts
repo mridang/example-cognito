@@ -36,7 +36,9 @@ export class TimingInterceptor implements NestInterceptor {
             .concat(`total;dur=${executionTime};desc="App Total"`)
             .join(', ');
 
-          response.setHeader('Server-Timing', serverTimingHeader);
+          if (!response.headersSent) {
+            response.setHeader('Server-Timing', serverTimingHeader);
+          }
         }),
       );
     });
