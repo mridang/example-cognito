@@ -57,7 +57,8 @@
 			"@typescript-eslint/eslint-plugin": "^7.0.0"
 		},
 		"@ntegral/nestjs-sentry": {
-			"reflect-metadata": "^0.2.1"
+			"reflect-metadata": "^0.2.1",
+			"@nestjs/graphql": "^12.1.1"
 		},
 		"@probot/pino": {
 			"@sentry/node": "7.106.0"
