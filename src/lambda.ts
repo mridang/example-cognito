@@ -10,9 +10,9 @@ import {
 } from 'aws-lambda';
 import { AppModule } from './app.module';
 import configure from './app';
-import { AsyncLocalStorage } from 'node:async_hooks';
 import { ClsService } from 'nestjs-cls';
-import { PowertoolsLoggerService } from './app.logger';
+import { AsyncLocalStorage } from 'node:async_hooks';
+import { BetterLogger } from './logger';
 
 let cachedServer: Handler;
 
@@ -21,14 +21,12 @@ async function bootstrap() {
     const nestApp = await NestFactory.create<NestExpressApplication>(
       AppModule,
       {
-        logger: new PowertoolsLoggerService(
-          new ClsService(new AsyncLocalStorage()),
-        ),
+        logger: new BetterLogger(new ClsService(new AsyncLocalStorage())),
         rawBody: true,
       },
     );
 
-    nestApp.useLogger(nestApp.get(PowertoolsLoggerService));
+    nestApp.useLogger(nestApp.get(BetterLogger));
     configure(nestApp);
     await nestApp.init();
 

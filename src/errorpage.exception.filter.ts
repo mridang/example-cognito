@@ -48,11 +48,7 @@ export class CustomHttpExceptionFilter implements ExceptionFilter {
 
       this.showError(status, host.switchToHttp());
     } else {
-      if (this.isExceptionObject(exception)) {
-        this.logger.error(exception.message, exception.stack);
-      } else {
-        this.logger.error(exception);
-      }
+      this.logger.error('An error occurred', exception);
       this.showError(HttpStatus.INTERNAL_SERVER_ERROR, host.switchToHttp());
     }
   }
