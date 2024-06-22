@@ -53,9 +53,6 @@
 		"url": "https://github.com/mridang/finchapp"
 	},
 	"overrides": {
-		"eslint-config-standard-with-typescript": {
-			"@typescript-eslint/eslint-plugin": "^7.0.0"
-		},
 		"@ntegral/nestjs-sentry": {
 			"reflect-metadata": "^0.2.1",
 			"@nestjs/graphql": "^12.1.1"
