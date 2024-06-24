@@ -1,9 +1,9 @@
 import { Injectable, LoggerService, LogLevel, Optional } from '@nestjs/common';
 import winston, { createLogger, format, transports } from 'winston';
 import { ClsService } from 'nestjs-cls';
-import { ProcessEnv } from 'npm-run-path';
-import { isString } from '@nestjs/common/utils/shared.utils';
 import { isLogLevelEnabled } from '@nestjs/common/services/utils';
+import { flatten } from 'safe-flat';
+import os from 'node:os';
 
 @Injectable()
 export class BetterLogger implements LoggerService {
@@ -21,7 +21,16 @@ export class BetterLogger implements LoggerService {
       'fatal',
     ],
     @Optional()
-    private readonly envVars: ProcessEnv = process.env,
+    private readonly envVars = process.env,
+    @Optional()
+    private readonly nodeOs: {
+      type(): string;
+      arch(): string;
+      hostname(): string;
+      platform(): string;
+      version(): string;
+      release(): string;
+    } = os,
   ) {
     this.logger = createLogger({
       level: 'debug',
@@ -29,13 +38,26 @@ export class BetterLogger implements LoggerService {
         ? format.combine(
             format((info) => {
               const ctx: object = this.clsService.get('ctx') || {};
+
+              const fields = flatten({
+                log: {
+                  level: info.level,
+                  logger: info.context,
+                },
+                message: info.message,
+                ['@timestamp']: new Date(),
+                ...ctx,
+              }) as { [key: string]: unknown };
+
+              delete fields.extras;
+              delete info.extras;
+
               return {
                 ...info,
-                ...ctx,
-                timestamp: new Date().toISOString().slice(0, -1),
+                ...fields,
               };
             })(),
-            format.json(),
+            format.json({ space: 0 }),
           )
         : format.combine(
             format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
@@ -44,13 +66,54 @@ export class BetterLogger implements LoggerService {
               return `${timestamp} ${context}: ${message}`;
             }),
           ),
-      defaultMeta: {
-        service_name: envVars.SERVICE_NAME,
-        aws_lambda_function_name: envVars.AWS_LAMBDA_FUNCTION_NAME,
-        aws_lambda_function_version: envVars.AWS_LAMBDA_FUNCTION_VERSION,
-        aws_region: envVars.AWS_REGION,
-        env_name: envVars.NODE_ENV,
-      },
+      defaultMeta: flatten({
+        service: {
+          environment: envVars.NODE_ENV,
+          id: envVars.SERVICE_ID,
+          name: envVars.SERVICE_NAME || envVars.AWS_LAMBDA_FUNCTION_NAME,
+          type: envVars.SERVICE_TYPE,
+          version:
+            envVars.SERVICE_VERSION || envVars.AWS_LAMBDA_FUNCTION_VERSION,
+        },
+        os: {
+          architecture: nodeOs.arch(),
+          hostname: nodeOs.hostname(),
+          id: nodeOs.hostname(),
+          ip: undefined,
+          name: nodeOs.hostname(),
+          os: {
+            family: nodeOs.type(),
+            full: `${nodeOs.type()} ${nodeOs.release()}`,
+            kernel: nodeOs.release(),
+            name: nodeOs.type(),
+            platform: nodeOs.platform(),
+            type: nodeOs.type().toLowerCase(),
+            version: nodeOs.version(),
+          },
+          type: 'unknown',
+        },
+        cloud: {
+          account: {
+            id: process.env.CLOUD_ACCOUNT_ID,
+            name: process.env.CLOUD_ACCOUNT_NAME,
+          },
+          availability_zone: process.env.CLOUD_AVAILABILITY_ZONE,
+          instance: {
+            id: process.env.CLOUD_INSTANCE_ID,
+            name: process.env.CLOUD_INSTANCE_NAME,
+          },
+          machine: {
+            type: process.env.CLOUD_MACHINE_TYPE,
+          },
+          provider: process.env.CLOUD_PROVIDER,
+          region: process.env.CLOUD_REGION || process.env.AWS_REGION,
+          service: {
+            name: process.env.CLOUD_SERVICE_NAME,
+          },
+          origin: undefined,
+          target: undefined,
+        },
+      }),
       transports: [new transports.Console()],
     });
   }
@@ -71,12 +134,20 @@ export class BetterLogger implements LoggerService {
 
     const error = optionalParams.find(
       (param) => param instanceof Error,
-    ) as Error;
+    ) as Error & { code?: string; id?: string };
 
     this.logger.info(message as string, {
       context,
       extras,
-      error: error?.stack,
+      error: error
+        ? {
+            code: error.code,
+            id: error.id,
+            message: error.message,
+            stack_trace: error.stack,
+            type: error.name,
+          }
+        : undefined,
     });
   }
 
@@ -97,12 +168,20 @@ export class BetterLogger implements LoggerService {
 
     const error = optionalParams.find(
       (param) => param instanceof Error,
-    ) as Error;
+    ) as Error & { code?: string; id?: string };
 
     this.logger.error(message as string, {
       context,
       extras,
-      error: error?.stack,
+      error: error
+        ? {
+            code: error.code,
+            id: error.id,
+            message: error.message,
+            stack_trace: error.stack,
+            type: error.name,
+          }
+        : undefined,
     });
 
     if (!this.envVars.AWS_LAMBDA_FUNCTION_NAME) {
@@ -126,12 +205,20 @@ export class BetterLogger implements LoggerService {
 
     const error = optionalParams.find(
       (param) => param instanceof Error,
-    ) as Error;
+    ) as Error & { code?: string; id?: string };
 
     this.logger.warn(message as string, {
       context,
       extras,
-      error: error?.stack,
+      error: error
+        ? {
+            code: error.code,
+            id: error.id,
+            message: error.message,
+            stack_trace: error.stack,
+            type: error.name,
+          }
+        : undefined,
     });
 
     if (!this.envVars.AWS_LAMBDA_FUNCTION_NAME) {
@@ -155,12 +242,20 @@ export class BetterLogger implements LoggerService {
 
     const error = optionalParams.find(
       (param) => param instanceof Error,
-    ) as Error;
+    ) as Error & { code?: string; id?: string };
 
     this.logger.debug(message as string, {
       context,
       extras,
-      error: error?.stack,
+      error: error
+        ? {
+            code: error.code,
+            id: error.id,
+            message: error.message,
+            stack_trace: error.stack,
+            type: error.name,
+          }
+        : undefined,
     });
   }
 
@@ -180,12 +275,20 @@ export class BetterLogger implements LoggerService {
 
     const error = optionalParams.find(
       (param) => param instanceof Error,
-    ) as Error;
+    ) as Error & { code?: string; id?: string };
 
     this.logger.verbose(message as string, {
       context,
       extras,
-      error: error?.stack,
+      error: error
+        ? {
+            code: error.code,
+            id: error.id,
+            message: error.message,
+            stack_trace: error.stack,
+            type: error.name,
+          }
+        : undefined,
     });
   }
 
@@ -205,12 +308,20 @@ export class BetterLogger implements LoggerService {
 
     const error = optionalParams.find(
       (param) => param instanceof Error,
-    ) as Error;
+    ) as Error & { code?: string; id?: string };
 
     this.logger.crit(message as string, {
       context,
       extras,
-      error: error?.stack,
+      error: error
+        ? {
+            code: error.code,
+            id: error.id,
+            message: error.message,
+            stack_trace: error.stack,
+            type: error.name,
+          }
+        : undefined,
     });
 
     if (!this.envVars.AWS_LAMBDA_FUNCTION_NAME) {
@@ -235,7 +346,7 @@ export class BetterLogger implements LoggerService {
     extras: unknown[] | undefined;
   } {
     if (args?.length >= 1) {
-      if (isString(args[args.length - 1])) {
+      if (typeof args[args.length - 1] === 'string') {
         return {
           context: args[args.length - 1] as string,
           extras: args.length > 1 ? args.slice(0, -1) : undefined,
