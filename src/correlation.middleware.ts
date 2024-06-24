@@ -1,4 +1,4 @@
-import { Injectable, NestMiddleware } from '@nestjs/common';
+import { Injectable, NestMiddleware, Optional } from '@nestjs/common';
 import { NextFunction, Request, Response } from 'express';
 import { getCurrentInvoke } from '@codegenie/serverless-express';
 import { ClsService } from 'nestjs-cls';
@@ -13,6 +13,7 @@ export class RequestIdMiddleware implements NestMiddleware {
 
   constructor(
     private readonly clsService: ClsService,
+    @Optional()
     private readonly currentInvoke: () => Context = () => {
       return getCurrentInvoke().context as Context;
     },

@@ -14,6 +14,7 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { IsEmail, IsNotEmpty } from 'class-validator';
+import { ClsService } from 'nestjs-cls';
 import { Public } from '../src/auth/constants';
 
 class TestDTO {
@@ -27,6 +28,10 @@ class TestDTO {
 
 @Controller()
 class DynamicController {
+  constructor(private readonly clsService: ClsService) {
+    //
+  }
+
   @Get('500')
   @Public()
   get500() {
@@ -53,7 +58,6 @@ class DynamicController {
   }
 
   @Get('cors-test')
-  @Public()
   getCorsTest() {
     return { message: 'CORS is enabled' };
   }
@@ -62,6 +66,12 @@ class DynamicController {
   @Public()
   validateTest(@Body() testDto: TestDTO) {
     return testDto;
+  }
+
+  @Get('cls-ctx')
+  @Public()
+  getClsCtx() {
+    return this.clsService.get('ctx') || {};
   }
 }
 
@@ -201,6 +211,33 @@ describe('app.controller test', () => {
       .then((response) => {
         expect(response.text).toContain('User-agent: *');
         expect(response.text).toContain('Disallow: /');
+      });
+  });
+
+  it('should have the request context set', async () => {
+    await request(testModule.app.getHttpServer())
+      .get('/cls-ctx')
+      .expect('Content-Type', /application\/json/)
+      .expect(200)
+      .then((response) => {
+        expect(response.body).toEqual({
+          url: {
+            domain: '127.0.0.1',
+            full: 'http://127.0.0.1/cls-ctx',
+            original: '/cls-ctx',
+            path: '/',
+            port: expect.any(Number),
+            query: null,
+            scheme: 'http',
+          },
+          user_agent: {
+            device: {},
+            original: '',
+            os: { full: 'undefined undefined' },
+          },
+          http: { request: { method: 'GET' }, version: '1.1' },
+          faas: { coldstart: expect.any(Boolean), trigger: { type: 'http' } },
+        });
       });
   });
 });
