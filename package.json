@@ -69,6 +69,7 @@
 	"devDependencies": {
 		"@jest/globals": "^29.7.0",
 		"@mridang/serverless-checkov-plugin": "^0.3.0",
+		"@mridang/serverless-resourcetag-plugin": "^1.1.0",
 		"@mridang/serverless-shortsha-plugin": "^0.1.1",
 		"@nestjs/cli": "^10.3.2",
 		"@nestjs/testing": "^10.3.3",
