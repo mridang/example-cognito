@@ -1,6 +1,6 @@
-<mxfile modified="2024-02-24T15:03:23.201Z" host="app.diagrams.net" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36" etag="AhQUR8y89jt8qcEpEfMX" version="23.1.6" type="device" pages="2">
-  <diagram id="V7B4Adpet9uSPmfZ2MFj" name="VPN vs Athena">
-    <mxGraphModel dx="857" dy="-262" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" background="none" math="0" shadow="1">
+<mxfile modified="2024-09-09T05:55:59.075Z" host="app.diagrams.net" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36" etag="jtRelMthltr-QA9A0xz-" version="24.7.0" type="device">
+  <diagram id="V7B4Adpet9uSPmfZ2MFj" name="Overview">
+    <mxGraphModel dx="1242" dy="-8" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" background="none" math="0" shadow="1">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -105,17 +105,6 @@
         </mxCell>
         <mxCell id="KC3xq8jwCQPXp9tBLLmZ-13" value="9. Deployment to continue if good, else skipped" style="text;strokeColor=none;align=center;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=8;" parent="1" vertex="1">
           <mxGeometry x="380" y="1110" width="60" height="30" as="geometry" />
-        </mxCell>
-      </root>
-    </mxGraphModel>
-  </diagram>
-  <diagram id="Pyb86QYZ4440mjfpspeC" name="Page-2">
-    <mxGraphModel dx="1242" dy="-8" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
-      <root>
-        <mxCell id="0" />
-        <mxCell id="1" parent="0" />
-        <mxCell id="299wAstBPE0hyUBUY5nS-1" value="" style="sketch=0;outlineConnect=0;fontColor=#232F3E;fillColor=#ED7100;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.lambda;perimeterSpacing=5;points=[[0,0.33,0,0,0],[0,0.67,0,0,0]];" vertex="1" parent="1">
-          <mxGeometry x="630.5" y="1020.5" width="50" height="50" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
