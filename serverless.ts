@@ -18,6 +18,7 @@ const serverlessConfiguration: AWS = {
     '@mridang/serverless-checkov-plugin',
     '@mridang/serverless-shortsha-plugin',
     '@mridang/serverless-resourcetag-plugin',
+    '@mridang/serverless-zipinfo-plugin',
   ],
   package: {
     individually: false,
