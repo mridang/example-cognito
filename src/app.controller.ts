@@ -1,22 +1,10 @@
 import { Controller, Get, Render, Req } from '@nestjs/common';
-import {
-  HealthCheck,
-  HealthCheckService,
-  HttpHealthIndicator,
-} from '@nestjs/terminus';
 import { Request } from 'express';
 import { Public } from './auth/constants';
 import * as jwt from 'jsonwebtoken';
 
 @Controller()
 export class AppController {
-  constructor(
-    private health: HealthCheckService,
-    private http: HttpHealthIndicator,
-  ) {
-    //
-  }
-
   @Get()
   @Render('index')
   showDecodedJwt(@Req() req: Request) {
@@ -48,10 +36,7 @@ export class AppController {
 
   @Public()
   @Get('health')
-  @HealthCheck()
   check() {
-    return this.health.check([
-      () => this.http.pingCheck('1.1.1.1', 'https://1.1.1.1/'),
-    ]);
+    return 'Ok';
   }
 }

@@ -14,7 +14,7 @@ const serverlessConfiguration: AWS = {
   service: packageJson.name,
   frameworkVersion: '3',
   plugins: [
-    'serverless-plugin-typescript',
+    'serverless-webpack',
     '@mridang/serverless-servestatic-plugin',
     '@mridang/serverless-checkov-plugin',
     '@mridang/serverless-shortsha-plugin',
@@ -23,19 +23,7 @@ const serverlessConfiguration: AWS = {
   ],
   package: {
     individually: false,
-    patterns: [
-      'public/**/*',
-      '**/*.hbs',
-      '**/*.html',
-      '!test',
-      '!jest.config.js',
-      '!jest.config.js.map',
-      '!prettier.config.js',
-      '!prettier.config.js.map',
-      '!serverless.js',
-      '!serverless.js.map',
-      '!package.json',
-    ],
+    patterns: ['public/**/*', '**/*.hbs', '**/*.html'],
   },
   provider: {
     stage: '${opt:stage, "dev"}',
@@ -1089,6 +1077,9 @@ const serverlessConfiguration: AWS = {
     },
   },
   custom: {
+    webpack: {
+      webpackConfig: 'webpack.config.js',
+    },
     servestatic: {
       include: ['public/**/*'],
       public: false,
