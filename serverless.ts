@@ -15,6 +15,7 @@ const serverlessConfiguration: AWS = {
   frameworkVersion: '3',
   plugins: [
     'serverless-plugin-typescript',
+    '@mridang/serverless-servestatic-plugin',
     '@mridang/serverless-checkov-plugin',
     '@mridang/serverless-shortsha-plugin',
     '@mridang/serverless-resourcetag-plugin',
@@ -110,6 +111,44 @@ const serverlessConfiguration: AWS = {
   },
   resources: {
     Resources: {
+      ServeStaticBucketPolicy: {
+        Type: 'AWS::S3::BucketPolicy',
+        Properties: {
+          Bucket: {
+            Ref: 'ServeStaticAssetsBucket',
+          },
+          PolicyDocument: {
+            Version: '2012-10-17',
+            Statement: [
+              {
+                Action: 's3:GetObject',
+                Principal: {
+                  Service: 'cloudfront.amazonaws.com',
+                },
+                Effect: 'Allow',
+                Resource: {
+                  'Fn::Sub': '${ServeStaticAssetsBucket.Arn}/*',
+                },
+                Condition: {
+                  StringEquals: {
+                    'AWS:SourceArn': {
+                      'Fn::Join': [
+                        '',
+                        [
+                          'arn:aws:cloudfront::',
+                          { Ref: 'AWS::AccountId' },
+                          ':distribution/',
+                          { Ref: 'CloudFrontDistribution' },
+                        ],
+                      ],
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        },
+      },
       LambdaOriginAccessControl: {
         Type: 'AWS::CloudFront::OriginAccessControl',
         Properties: {
@@ -203,6 +242,18 @@ const serverlessConfiguration: AWS = {
                   Ref: 'LambdaOriginAccessControl',
                 },
               },
+              {
+                Id: 'BucketOrigin',
+                DomainName: {
+                  'Fn::GetAtt': ['ServeStaticAssetsBucket', 'DomainName'],
+                },
+                S3OriginConfig: {
+                  OriginAccessIdentity: '',
+                },
+                OriginAccessControlId: {
+                  'Fn::GetAtt': ['ServeStaticAllowCloudfront', 'Id'],
+                },
+              },
             ],
             DefaultCacheBehavior: {
               TargetOriginId: 'LambdaOrigin',
@@ -224,7 +275,7 @@ const serverlessConfiguration: AWS = {
             CacheBehaviors: [
               {
                 PathPattern: '/static/*',
-                TargetOriginId: 'LambdaOrigin',
+                TargetOriginId: 'BucketOrigin',
                 ViewerProtocolPolicy: 'redirect-to-https',
                 AllowedMethods: ['GET', 'HEAD', 'OPTIONS'],
                 CachedMethods: ['GET', 'HEAD'],

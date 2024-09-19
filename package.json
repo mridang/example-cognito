@@ -71,6 +71,7 @@
 		"@jest/globals": "^29.7.0",
 		"@mridang/serverless-checkov-plugin": "^0.3.0",
 		"@mridang/serverless-resourcetag-plugin": "^1.1.0",
+		"@mridang/serverless-servestatic-plugin": "^1.0.0",
 		"@mridang/serverless-shortsha-plugin": "^0.1.1",
 		"@mridang/serverless-zipinfo-plugin": "^1.1.0",
 		"@nestjs/cli": "^10.3.2",
