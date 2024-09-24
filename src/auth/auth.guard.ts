@@ -24,9 +24,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     return super.canActivate(context) as boolean;
   }
 
-  handleRequest(err: any, user: any, context: ExecutionContext) {
-    const response = context.switchToHttp().getResponse();
-
+  handleRequest(err: any, user: any) {
     if (err || !user) {
       throw new UnauthorizedException();
     }

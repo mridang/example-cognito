@@ -51,7 +51,7 @@ jobs:
         with:
           browser: chrome
           start: npx nest start
-          wait-on: 'http://localhost:3000'
+          wait-on: 'http://localhost:3000/health'
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
