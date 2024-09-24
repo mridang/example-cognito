@@ -2,8 +2,6 @@ import {
   BadRequestException,
   Controller,
   Get,
-  HttpException,
-  HttpStatus,
   InternalServerErrorException,
   Render,
   Req,
@@ -11,15 +9,9 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import cognitoConfig, { Public } from './constants';
-import { HttpService } from '@nestjs/axios';
-import { lastValueFrom } from 'rxjs';
 
 @Controller()
 export class AuthController {
-  constructor(private httpService: HttpService) {
-    //
-  }
-
   @Get('oops')
   @Render('oops')
   @Public()
@@ -46,47 +38,46 @@ export class AuthController {
     const { code } = req.query;
     if (typeof code === 'string') {
       try {
-        const response = await lastValueFrom(
-          this.httpService.post(
-            `${cognitoConfig.cognitoAuthDomain}/oauth2/token`,
-            new URLSearchParams({
+        const response = await fetch(
+          `${cognitoConfig.cognitoAuthDomain}/oauth2/token`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
               grant_type: 'authorization_code',
               client_id: cognitoConfig.poolClientId,
               redirect_uri: cognitoConfig.postCallbackUri,
               code: code,
             }).toString(),
-            {
-              headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-              },
-            },
-          ),
+          },
         );
 
-        if (!response || !response.data) {
-          throw new HttpException(
-            'Failed to retrieve tokens',
-            HttpStatus.INTERNAL_SERVER_ERROR,
-          );
-        }
+        const data = (await response.json()) as {
+          id_token: string;
+          access_token: string;
+          refresh_token: string;
+          expires_in: number;
+        };
 
-        res.cookie('jwt', response.data.id_token, {
+        res.cookie('jwt', data.id_token, {
           httpOnly: true,
           secure: true,
           sameSite: 'strict',
           maxAge: cognitoConfig.sessionDurationDays * 1000,
         });
-        res.cookie('at', response.data.access_token, {
+        res.cookie('at', data.access_token, {
           httpOnly: true,
           secure: true,
           sameSite: 'strict',
-          maxAge: response.data.expires_in * 1000,
+          maxAge: data.expires_in * 1000,
         });
-        res.cookie('rt', response.data.refresh_token, {
+        res.cookie('rt', data.refresh_token, {
           httpOnly: true,
           secure: true,
           sameSite: 'strict',
-          maxAge: response.data.expires_in * 1000,
+          maxAge: data.expires_in * 1000,
         });
 
         res.redirect('/');

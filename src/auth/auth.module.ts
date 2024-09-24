@@ -5,14 +5,13 @@ import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './jwt.strategy';
 import { JwtAuthGuard } from './auth.guard';
 import { AuthController } from './auth.controller';
-import { HttpModule } from '@nestjs/axios';
 import { ProfileController } from './profile.controller';
 import { MfaController } from './totp.controller';
 import { CognitoIdentityProviderClient } from '@aws-sdk/client-cognito-identity-provider';
 import { DefaultAuthFilter } from './auth.filter';
 
 @Module({
-  imports: [PassportModule, JwtModule.register({}), HttpModule],
+  imports: [PassportModule, JwtModule.register({})],
   controllers: [AuthController, ProfileController, MfaController],
   providers: [
     {

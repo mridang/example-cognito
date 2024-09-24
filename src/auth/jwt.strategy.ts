@@ -1,23 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-  HttpException,
-  HttpStatus,
-  Inject,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import * as jwksRsa from 'jwks-rsa';
 import cognitoConfig from './constants';
 import { Request } from 'express';
-import { lastValueFrom } from 'rxjs';
-import { HttpService } from '@nestjs/axios';
 import * as jwt from 'jsonwebtoken';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(@Inject(HttpService) private readonly httpService: HttpService) {
+  constructor() {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request) => {
@@ -38,43 +30,42 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: any, request: Request) {
     if (payload.exp < Math.floor(Date.now() / 1000)) {
       try {
-        const response = await lastValueFrom(
-          this.httpService.post(
-            `${cognitoConfig.cognitoAuthDomain}/oauth2/token`,
-            new URLSearchParams({
+        const response = await fetch(
+          `${cognitoConfig.cognitoAuthDomain}/oauth2/token`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
               grant_type: 'refresh_token',
               client_id: cognitoConfig.poolClientId,
               refresh_token: request.cookies['rt'],
             }).toString(),
-            {
-              headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-              },
-            },
-          ),
+          },
         );
 
-        if (!response || !response.data) {
-          throw new HttpException(
-            'Failed to retrieve tokens',
-            HttpStatus.INTERNAL_SERVER_ERROR,
-          );
-        }
+        const data = (await response.json()) as {
+          id_token: string;
+          access_token: string;
+          refresh_token: string;
+          expires_in: number;
+        };
 
-        request?.res?.cookie('at', response.data.access_token, {
+        request?.res?.cookie('at', data.access_token, {
           httpOnly: true,
           secure: true,
           sameSite: 'strict',
-          maxAge: response.data.expires_in * 1000,
+          maxAge: data.expires_in * 1000,
         });
-        request?.res?.cookie('jwt', response.data.id_token, {
+        request?.res?.cookie('jwt', data.id_token, {
           httpOnly: true,
           secure: true,
           sameSite: 'strict',
-          maxAge: response.data.expires_in * 1000,
+          maxAge: data.expires_in * 1000,
         });
 
-        const newPayload = jwt.decode(response.data.access_token) as any;
+        const newPayload = jwt.decode(data.access_token) as any;
 
         return {
           userId: newPayload.sub,
