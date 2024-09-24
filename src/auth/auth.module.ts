@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './jwt.strategy';
@@ -9,6 +9,7 @@ import { HttpModule } from '@nestjs/axios';
 import { ProfileController } from './profile.controller';
 import { MfaController } from './totp.controller';
 import { CognitoIdentityProviderClient } from '@aws-sdk/client-cognito-identity-provider';
+import { DefaultAuthFilter } from './auth.filter';
 
 @Module({
   imports: [PassportModule, JwtModule.register({}), HttpModule],
@@ -21,6 +22,10 @@ import { CognitoIdentityProviderClient } from '@aws-sdk/client-cognito-identity-
       },
     },
     JwtStrategy,
+    {
+      provide: APP_FILTER,
+      useClass: DefaultAuthFilter,
+    },
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,

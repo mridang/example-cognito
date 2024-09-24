@@ -9,10 +9,9 @@ import {
   Handler,
 } from 'aws-lambda';
 import { AppModule } from './app.module';
-import configure from './app';
 import { ClsService } from 'nestjs-cls';
 import { AsyncLocalStorage } from 'node:async_hooks';
-import { BetterLogger } from './logger';
+import { BetterLogger, configure } from '@mridang/nestjs-defaults';
 
 let cachedServer: Handler;
 
@@ -27,7 +26,7 @@ async function bootstrap() {
     );
 
     nestApp.useLogger(nestApp.get(BetterLogger));
-    configure(nestApp);
+    configure(nestApp, __dirname);
     await nestApp.init();
 
     cachedServer = serverlessExpress({

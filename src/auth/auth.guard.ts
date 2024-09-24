@@ -1,5 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Injectable, ExecutionContext } from '@nestjs/common';
+import {
+  Injectable,
+  ExecutionContext,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -20,12 +24,11 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     return super.canActivate(context) as boolean;
   }
 
-  handleRequest(err: any, user: any, info: any, context: ExecutionContext) {
+  handleRequest(err: any, user: any, context: ExecutionContext) {
     const response = context.switchToHttp().getResponse();
 
     if (err || !user) {
-      response.redirect('/oops');
-      return null;
+      throw new UnauthorizedException();
     }
     return user;
   }

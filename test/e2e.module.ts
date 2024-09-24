@@ -1,3 +1,4 @@
+import { configure } from '@mridang/nestjs-defaults';
 import {
   type DynamicModule,
   type ForwardReference,
@@ -8,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { type NestExpressApplication } from '@nestjs/platform-express';
 import { Test, TestingModuleBuilder } from '@nestjs/testing';
-import configure from '../src/app';
+import { join } from 'path';
 
 export class End2EndModule {
   app!: INestApplication;
@@ -50,7 +51,7 @@ export class End2EndModule {
       },
     );
 
-    configure(nestApp);
+    configure(nestApp, join(__dirname, '..', 'src'));
     await nestApp.init();
     this.app = nestApp;
   }

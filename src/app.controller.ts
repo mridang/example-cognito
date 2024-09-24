@@ -33,10 +33,4 @@ export class AppController {
       //
     };
   }
-
-  @Public()
-  @Get('health')
-  check() {
-    return 'Ok';
-  }
 }
