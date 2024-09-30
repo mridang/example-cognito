@@ -73,7 +73,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
           givenName: newPayload['given_name'],
           familyName: newPayload['family_name'],
         };
-      } catch (error) {
+      } catch {
         throw new UnauthorizedException();
       }
     } else {
