@@ -4,7 +4,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import * as jwksRsa from 'jwks-rsa';
 import cognitoConfig from './constants';
-import { Request } from 'express';
+import { Request } from '@mridang/nestjs-defaults';
 import * as jwt from 'jsonwebtoken';
 
 @Injectable()

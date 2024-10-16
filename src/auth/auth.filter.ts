@@ -5,7 +5,7 @@ import {
   HttpException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { Response } from 'express';
+import { Response } from '@mridang/nestjs-defaults';
 
 @Catch(UnauthorizedException)
 export class DefaultAuthFilter implements ExceptionFilter {
