@@ -7,7 +7,7 @@ import {
   Render,
   Req,
 } from '@nestjs/common';
-import { Request } from 'express';
+import { Request } from '@mridang/nestjs-defaults';
 import {
   AdminSetUserMFAPreferenceCommand,
   AssociateSoftwareTokenCommand,

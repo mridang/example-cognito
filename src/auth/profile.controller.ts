@@ -4,7 +4,7 @@ import {
   GetUserCommand,
   UpdateUserAttributesCommand,
 } from '@aws-sdk/client-cognito-identity-provider';
-import { Request } from 'express';
+import { Request } from '@mridang/nestjs-defaults';
 import { UpdateProfileDto } from './update-profile.dto';
 
 @Controller('profile')

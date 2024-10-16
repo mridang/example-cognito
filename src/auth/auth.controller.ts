@@ -7,7 +7,7 @@ import {
   Req,
   Res,
 } from '@nestjs/common';
-import { Request, Response } from 'express';
+import { Request, Response } from '@mridang/nestjs-defaults';
 import cognitoConfig, { Public } from './constants';
 
 @Controller()

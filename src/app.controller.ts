@@ -1,5 +1,5 @@
 import { Controller, Get, Render, Req } from '@nestjs/common';
-import { Request } from 'express';
+import { Request } from '@mridang/nestjs-defaults';
 import { Public } from './auth/constants';
 import * as jwt from 'jsonwebtoken';
 
