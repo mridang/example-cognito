@@ -1,12 +1,12 @@
-import { Controller, Get, Render, Req } from '@nestjs/common';
+import { Controller, Get, Req } from '@nestjs/common';
 import { Request } from '@mridang/nestjs-defaults';
 import { Public } from './auth/constants';
 import * as jwt from 'jsonwebtoken';
+import indexView from './index.view';
 
 @Controller()
 export class AppController {
   @Get()
-  @Render('index')
   showDecodedJwt(@Req() req: Request) {
     const token = req.cookies['jwt'];
     let jwtData = '';
@@ -20,10 +20,7 @@ export class AppController {
       jwtData = 'Error decoding JWT';
     }
 
-    return {
-      jwt: jwtData,
-      isLoggedIn: isLoggedIn,
-    };
+    return indexView(isLoggedIn, jwtData);
   }
 
   @Public()

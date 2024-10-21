@@ -3,22 +3,19 @@ import {
   Controller,
   Get,
   InternalServerErrorException,
-  Render,
   Req,
   Res,
 } from '@nestjs/common';
 import { Request, Response } from '@mridang/nestjs-defaults';
 import cognitoConfig, { Public } from './constants';
+import oopsView from './oops.view';
 
 @Controller()
 export class AuthController {
   @Get('oops')
-  @Render('oops')
   @Public()
   getOopsPage() {
-    return {
-      //
-    };
+    return oopsView();
   }
 
   @Public()

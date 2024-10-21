@@ -15,10 +15,7 @@ module.exports = {
   mode: 'production',
   devtool: 'source-map',
   resolve: {
-    extensions: ['.ts', '.js'],
-    alias: {
-      handlebars: 'handlebars/dist/cjs/handlebars.js',
-    },
+    extensions: ['.ts', '.tsx', '.js'],
   },
   ignoreWarnings: [
     (warning) => {
@@ -49,7 +46,7 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.ts$/,
+        test: /\.([cm]?tsx?|mts)$/,
         use: 'ts-loader',
         exclude: /node_modules/,
       },
@@ -85,10 +82,7 @@ module.exports = {
       reportFilename: path.resolve(__dirname, '.out', 'webpack.html'),
     }),
     new CopyWebpackPlugin({
-      patterns: [
-        { from: 'public', to: 'public' },
-        { from: 'src/views', to: 'views' },
-      ],
+      patterns: [{ from: 'public', to: 'public' }],
     }),
   ],
   optimization: {
