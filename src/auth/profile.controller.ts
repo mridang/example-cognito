@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Render, Req } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req } from '@nestjs/common';
 import {
   CognitoIdentityProviderClient,
   GetUserCommand,
@@ -6,6 +6,7 @@ import {
 } from '@aws-sdk/client-cognito-identity-provider';
 import { Request } from '@mridang/nestjs-defaults';
 import { UpdateProfileDto } from './update-profile.dto';
+import profileView from './profile.view';
 
 @Controller('profile')
 export class ProfileController {
@@ -16,20 +17,14 @@ export class ProfileController {
   }
 
   @Get()
-  @Render('profile')
   async getUpdatePage(@Req() req: Request) {
     const accessToken = req.cookies['at'];
     const userData = await this.cognitoClient.send(
       new GetUserCommand({ AccessToken: accessToken }),
     );
 
-    return (
-      userData.UserAttributes?.reduce(
-        (acc, { Name, Value }) => (Name ? { ...acc, [Name]: Value } : acc),
-        {
-          //
-        },
-      ) || {}
+    return profileView(
+      userData.UserAttributes as { Name: string; Value: string }[],
     );
   }
 

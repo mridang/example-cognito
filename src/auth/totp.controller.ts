@@ -4,7 +4,6 @@ import {
   Controller,
   Get,
   Post,
-  Render,
   Req,
 } from '@nestjs/common';
 import { Request } from '@mridang/nestjs-defaults';
@@ -17,6 +16,7 @@ import {
 } from '@aws-sdk/client-cognito-identity-provider';
 import * as QRCode from 'qrcode';
 import cognitoConfig from './constants';
+import totpView from './totp.view';
 
 @Controller('totp')
 export class MfaController {
@@ -27,7 +27,6 @@ export class MfaController {
   }
 
   @Get('setup')
-  @Render('totp')
   async renderSetupPage(@Req() req: Request) {
     const accessToken = req.cookies.at;
 
@@ -42,11 +41,10 @@ export class MfaController {
         new AssociateSoftwareTokenCommand({ AccessToken: accessToken }),
       );
 
-      return {
-        qrcode: await QRCode.toDataURL(
-          `otpauth://totp/AWSCognito:${getUserResult.Username}?secret=${associateResult.SecretCode}&issuer=AWSCognito`,
-        ),
-      };
+      const qrCode = await QRCode.toDataURL(
+        `otpauth://totp/AWSCognito:${getUserResult.Username}?secret=${associateResult.SecretCode}&issuer=AWSCognito`,
+      );
+      return totpView(qrCode, '');
     }
   }
 
