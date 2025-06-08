@@ -2,10 +2,10 @@ services:
   localstack:
     image: localstack/localstack:3.2
     ports:
-      - "${LOCALSTACK_PORT:-4566}:4566"
+      - '${LOCALSTACK_PORT:-4566}:4566'
     environment:
       - DEBUG=1
       - DEFAULT_REGION=us-east-1
       - EDGE_PORT=4566
     volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock"
+      - '/var/run/docker.sock:/var/run/docker.sock'
