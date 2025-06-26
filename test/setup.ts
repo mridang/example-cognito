@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import path from 'path';
 import {
   DockerComposeEnvironment,
@@ -9,7 +8,7 @@ import findFreePorts from 'find-free-ports';
 
 declare global {
   // noinspection ES6ConvertVarToLetConst
-  var DOCKER: StartedDockerComposeEnvironment; // eslint-disable-line no-var
+  var DOCKER: StartedDockerComposeEnvironment;
 }
 
 config();

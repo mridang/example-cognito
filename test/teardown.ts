@@ -1,5 +1,3 @@
-/* eslint-disable no-console */
-
 // noinspection JSUnusedGlobalSymbols
 export default async function teardown(): Promise<void> {
   if (globalThis.DOCKER) {
