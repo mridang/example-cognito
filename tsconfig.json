@@ -13,12 +13,6 @@
     "jsx": "react-jsx",
     "jsxImportSource": "preact"
   },
-  "include": [
-    "**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "**/*.spec.ts",
-    "dist"
-  ]
+  "include": ["**/*"],
+  "exclude": ["node_modules", "**/*.spec.ts", "dist"]
 }
