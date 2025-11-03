@@ -21,7 +21,7 @@ jobs:
           echo "${{ github.event.inputs.release_identifier }}" > release.txt
 
       - name: Upload release identifier
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: release
           path: release.txt
@@ -30,7 +30,7 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
           cache: 'npm'
           node-version-file: '.nvmrc'
