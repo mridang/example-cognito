@@ -24,4 +24,14 @@ module.exports = {
   testTimeout: 60000,
   globalSetup: './test/setup.ts',
   globalTeardown: './test/teardown.ts',
+  reporters: [
+    'default',
+    [
+      'jest-junit',
+      {
+        outputDirectory: './.out',
+        outputName: 'junit.xml',
+      },
+    ],
+  ],
 };
