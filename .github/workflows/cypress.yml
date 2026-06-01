@@ -16,6 +16,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Runner Common Setup
+        uses: mridang/action-runner-common@v1
+
       - name: Write inputs to file
         run: |
           echo "${{ github.event.inputs.release_identifier }}" > release.txt
