@@ -4,9 +4,9 @@ import {
   GetUserCommand,
   UpdateUserAttributesCommand,
 } from '@aws-sdk/client-cognito-identity-provider';
-import { Request } from '@mridang/nestjs-defaults';
-import { UpdateProfileDto } from './update-profile.dto';
-import profileView from './profile.view';
+import type { Request } from '@mridang/nestjs-defaults';
+import type { UpdateProfileDto } from './update-profile.dto.js';
+import profileView from './profile.view.js';
 
 @Controller('profile')
 export class ProfileController {

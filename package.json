@@ -1,13 +1,14 @@
 {
   "name": "example-cognito",
   "version": "0.0.1",
+  "type": "module",
   "scripts": {
-    "build": "sls package",
+    "build": "tsc --noEmit",
     "deploy": "sls deploy --aws-profile=mridang",
     "start": "npx nest start",
-    "test": "jest --verbose --config=jest.config.js --runInBand",
+    "test": "jest --verbose --config=jest.config.mjs",
     "test:watch": "npm run test -- --watch",
-    "test:debug": "jest --verbose --config=jest.config.js --runInBand --detectOpenHandles",
+    "test:debug": "jest --verbose --config=jest.config.mjs --detectOpenHandles",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "npx eslint .",
