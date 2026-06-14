@@ -1,9 +1,10 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
+import { AppModule } from './app.module.js';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { ClsService } from 'nestjs-cls';
 import { AsyncLocalStorage } from 'node:async_hooks';
-import { BetterLogger, configure } from '@mridang/nestjs-defaults';
+import pkg from '@mridang/nestjs-defaults';
+const { BetterLogger, configure } = pkg;
 
 async function bootstrap() {
   const nestApp = await NestFactory.create<NestExpressApplication>(AppModule, {

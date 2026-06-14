@@ -1,12 +1,17 @@
-const path = require('path');
-const webpack = require('webpack');
-const slsw = require('serverless-webpack');
-const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
-const CopyWebpackPlugin = require('copy-webpack-plugin');
-const TerserPlugin = require('terser-webpack-plugin');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+import path from 'path';
+import webpack from 'webpack';
+import slsw from 'serverless-webpack';
+import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
+import CopyWebpackPlugin from 'copy-webpack-plugin';
+import TerserPlugin from 'terser-webpack-plugin';
+import { CleanWebpackPlugin } from 'clean-webpack-plugin';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
-module.exports = {
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+export default {
   entry: Object.keys(slsw.lib.entries).length
     ? slsw.lib.entries
     : './src/main.ts',

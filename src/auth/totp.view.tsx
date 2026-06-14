@@ -1,4 +1,6 @@
-import { FunctionalComponent, render } from '@mridang/nestjs-defaults';
+import type { FunctionalComponent } from '@mridang/nestjs-defaults';
+import pkg from '@mridang/nestjs-defaults';
+const { render } = pkg;
 
 const TotpView: FunctionalComponent<{ qrcode: string; message: string }> = ({
   qrcode,

@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import serverlessExpress from '@codegenie/serverless-express';
+import { configure as serverlessExpress } from '@codegenie/serverless-express';
 import {
   APIGatewayProxyEvent,
   APIGatewayProxyResult,
@@ -8,10 +8,11 @@ import {
   Context,
   Handler,
 } from 'aws-lambda';
-import { AppModule } from './app.module';
+import { AppModule } from './app.module.js';
 import { ClsService } from 'nestjs-cls';
 import { AsyncLocalStorage } from 'node:async_hooks';
-import { BetterLogger, configure } from '@mridang/nestjs-defaults';
+import pkg from '@mridang/nestjs-defaults';
+const { BetterLogger, configure } = pkg;
 
 let cachedServer: Handler;
 
