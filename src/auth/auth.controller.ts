@@ -6,9 +6,9 @@ import {
   Req,
   Res,
 } from '@nestjs/common';
-import { Request, Response } from '@mridang/nestjs-defaults';
-import cognitoConfig, { Public } from './constants';
-import oopsView from './oops.view';
+import type { Request, Response } from '@mridang/nestjs-defaults';
+import cognitoConfig, { Public } from './constants.js';
+import oopsView from './oops.view.js';
 
 @Controller()
 export class AuthController {

@@ -1,8 +1,8 @@
 import { Controller, Get, Req } from '@nestjs/common';
-import { Request } from '@mridang/nestjs-defaults';
-import { Public } from './auth/constants';
-import * as jwt from 'jsonwebtoken';
-import indexView from './index.view';
+import type { Request } from '@mridang/nestjs-defaults';
+import { Public } from './auth/constants.js';
+import jwt from 'jsonwebtoken';
+import indexView from './index.view.js';
 
 @Controller()
 export class AppController {

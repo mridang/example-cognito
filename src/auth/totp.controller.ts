@@ -6,7 +6,7 @@ import {
   Post,
   Req,
 } from '@nestjs/common';
-import { Request } from '@mridang/nestjs-defaults';
+import type { Request } from '@mridang/nestjs-defaults';
 import {
   AdminSetUserMFAPreferenceCommand,
   AssociateSoftwareTokenCommand,
@@ -14,9 +14,9 @@ import {
   GetUserCommand,
   VerifySoftwareTokenCommand,
 } from '@aws-sdk/client-cognito-identity-provider';
-import * as QRCode from 'qrcode';
-import cognitoConfig from './constants';
-import totpView from './totp.view';
+import QRCode from 'qrcode';
+import cognitoConfig from './constants.js';
+import totpView from './totp.view.js';
 
 @Controller('totp')
 export class MfaController {

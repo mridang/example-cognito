@@ -1,6 +1,6 @@
 import { expect } from '@jest/globals';
 import { APIGatewayProxyEvent, Context } from 'aws-lambda';
-import { handler } from '../src/lambda';
+import { handler } from '../src/lambda.js';
 import { HttpStatus } from '@nestjs/common';
 
 describe('Lambda Handler', () => {
@@ -42,7 +42,7 @@ describe('Lambda Handler', () => {
         },
       } as APIGatewayProxyEvent,
       context as Context,
-      (error, result) => {
+      (error: unknown, result: { statusCode?: number } | undefined) => {
         expect(error).toBeNull();
         expect(result).toBeDefined();
         expect(result?.statusCode).toEqual(HttpStatus.OK);

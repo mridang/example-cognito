@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { HttpStatus } from '@nestjs/common';
-import { End2EndModule } from './e2e.module';
-import { AppModule } from '../src/app.module';
+import { End2EndModule } from './e2e.module.js';
+import { AppModule } from '../src/app.module.js';
 
 const testModule = new End2EndModule({
   imports: [
