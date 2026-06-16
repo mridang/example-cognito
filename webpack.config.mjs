@@ -1,4 +1,4 @@
-import path from 'path';
+import path, { dirname } from 'path';
 import webpack from 'webpack';
 import slsw from 'serverless-webpack';
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
@@ -6,7 +6,6 @@ import CopyWebpackPlugin from 'copy-webpack-plugin';
 import TerserPlugin from 'terser-webpack-plugin';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import { fileURLToPath } from 'url';
-import { dirname } from 'path';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);

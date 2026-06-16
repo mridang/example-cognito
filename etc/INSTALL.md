@@ -58,7 +58,7 @@ on: # Do not edit
   workflow_dispatch: # Do not edit
     inputs: # Do not edit
       release_identifier: # Do not edit
-        description: 'Release identifier' # Do not edit
+        description: Release identifier # Do not edit
         required: true # Do not edit
 
 defaults:
@@ -86,7 +86,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
+          node-version-file: .nvmrc
 
       - name: Cache node modules
         uses: actions/cache@v4
@@ -101,7 +101,6 @@ jobs:
 
       - name: Run Cypress Tests
         uses: cypress-io/github-action@v6
-        with:
 ```
 
 You may use that snippet as a template while ensuring that the lines marked
