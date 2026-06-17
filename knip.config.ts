@@ -1,5 +1,4 @@
 export default {
   entry: ['serverless.ts'],
-  ignore: ['knip.config.ts'],
-  ignoreDependencies: [/^@mridang\/serverless-/, 'preact'],
+  ignoreDependencies: [/^@mridang\/serverless-/, 'preact', 'aws-lambda'],
 };
